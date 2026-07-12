@@ -77,6 +77,7 @@ export function TeamClient({
   const [name, setName] = useState("");
   const [role, setRole] = useState<TeamMemberRole>("member");
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   function openInvite() {
@@ -100,6 +101,8 @@ export function TeamClient({
       setError(res.error);
       return;
     }
+    // Mostra o resultado do envio: se o e-mail falhou, você precisa saber.
+    setNotice(res?.message ?? null);
     setOpen(false);
     router.refresh();
   }
@@ -123,6 +126,19 @@ export function TeamClient({
 
   return (
     <div className="space-y-6">
+      {notice && (
+        <div className="flex items-start justify-between gap-3 rounded-lg border border-[#03A9F4]/30 bg-[#03A9F4]/5 px-4 py-3">
+          <p className="text-sm text-slate-700">{notice}</p>
+          <button
+            type="button"
+            onClick={() => setNotice(null)}
+            className="shrink-0 text-slate-400 hover:text-slate-600"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
           {isAdmin

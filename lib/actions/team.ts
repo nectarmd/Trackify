@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import { requireWorkspace } from "@/lib/workspace";
+import { sendInviteEmail } from "@/lib/email";
 import type { ActionResult } from "./result";
 
 async function requireAdmin() {
@@ -66,7 +67,19 @@ export async function inviteMember(formData: FormData): Promise<ActionResult> {
   if (error) return { error: "Não foi possível convidar." };
 
   revalidatePath("/equipes");
-  return { ok: true };
+
+  // O e-mail é um aviso, não a fonte da verdade: o convite já vale no sistema.
+  // Se o envio falhar, não desfazemos nada — só avisamos que é preciso avisar
+  // a pessoa manualmente.
+  const mail = await sendInviteEmail(email, workspace.name);
+  if (!mail.sent) {
+    return {
+      ok: true,
+      message: `Convite criado, mas o e-mail não foi enviado (${mail.error}). Avise ${email} manualmente.`,
+    };
+  }
+
+  return { ok: true, message: `Convite enviado para ${email}.` };
 }
 
 /** Muda o papel de um membro já vinculado. */
