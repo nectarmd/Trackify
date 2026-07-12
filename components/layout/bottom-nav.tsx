@@ -14,10 +14,11 @@ import { cn } from "@/lib/utils";
 
 type NavItem = { href: string; label: string; icon: LucideIcon };
 
+// Rastreador é a página inicial: fica no centro (3º de 5), à mão do polegar.
 const items: NavItem[] = [
-  { href: "/tracker", label: "Rastreador", icon: Clock },
   { href: "/planilha", label: "Planilha", icon: Table2 },
   { href: "/calendario", label: "Calendário", icon: Calendar },
+  { href: "/tracker", label: "Rastreador", icon: Clock },
   { href: "/reports", label: "Relatórios", icon: BarChart3 },
   { href: "/projects", label: "Projetos", icon: FolderKanban },
 ];

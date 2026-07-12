@@ -25,8 +25,9 @@ import { cn } from "@/lib/utils";
 type NavItem = { href: string; label: string; icon: LucideIcon };
 
 const mainNav: NavItem[] = [
-  { href: "/planilha", label: "PLANILHA", icon: Table2 },
+  // Rastreador é a página inicial do app: vem primeiro.
   { href: "/tracker", label: "RASTREADOR", icon: Clock },
+  { href: "/planilha", label: "PLANILHA", icon: Table2 },
   { href: "/calendario", label: "CALENDÁRIO", icon: Calendar },
   { href: "/planejador", label: "PLANEJADOR", icon: ClipboardList },
   { href: "/despesas", label: "DESPESAS", icon: Receipt },
