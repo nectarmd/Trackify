@@ -100,6 +100,24 @@ export async function stopTimer(id: string): Promise<ActionResult> {
   return { ok: true };
 }
 
+/**
+ * Para o timer ativo do usuário sem precisar do id. Necessário porque, logo
+ * após "continuar" a partir de um card, o cliente ainda tem só um id
+ * temporário (o servidor não respondeu) — pausar por id falharia nessa janela.
+ */
+export async function stopCurrentTimer(): Promise<ActionResult> {
+  const { supabase, user } = await requireUser();
+  const { error } = await supabase
+    .from("time_entries")
+    .update({ end_time: new Date().toISOString() })
+    .eq("user_id", user.id)
+    .is("end_time", null);
+  if (error) return { error: "Não foi possível parar o timer." };
+
+  revalidatePath("/tracker");
+  return { ok: true };
+}
+
 export async function createManualEntry(
   input: EntryInput
 ): Promise<ActionResult> {

@@ -1,7 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { DollarSign, Play, MoreVertical, Pencil, Copy, Trash2 } from "lucide-react";
+import {
+  DollarSign,
+  Play,
+  Pause,
+  MoreVertical,
+  Pencil,
+  Copy,
+  Trash2,
+} from "lucide-react";
 import type { ProjectWithClient, Tag, TimeEntryWithRelations } from "@/lib/types";
 import {
   continueEntry,
@@ -21,13 +29,17 @@ export function EntryRow({
   entry,
   projects,
   tags,
+  isRunningHere,
   onContinue,
+  onStopRow,
   onDeleted,
 }: {
   entry: TimeEntryWithRelations;
   projects: ProjectWithClient[];
   tags: Tag[];
+  isRunningHere?: boolean;
   onContinue?: (entry: TimeEntryWithRelations) => void;
+  onStopRow?: () => void;
   onDeleted?: (id: string) => void;
 }) {
   const [editing, setEditing] = useState(false);
@@ -41,9 +53,14 @@ export function EntryRow({
   async function handleContinue() {
     if (busy) return;
     setBusy(true);
-    onContinue?.(entry); // o timer no topo já começa a contar
+    onContinue?.(entry); // o pause já aparece aqui neste card
     await continueEntry(entry.id);
     setBusy(false);
+  }
+  // Pausa o timer que foi acionado neste próprio card.
+  function handleStop() {
+    if (busy) return;
+    onStopRow?.();
   }
   async function handleDuplicate() {
     if (busy) return;
@@ -102,15 +119,25 @@ export function EntryRow({
           {formatDuration(duration)}
         </div>
 
-        <button
-          type="button"
-          onClick={handleContinue}
-          disabled={busy}
-          title="Continuar"
-          className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-[#03A9F4]/10 hover:text-[#03A9F4]"
-        >
-          <Play className="h-4 w-4 fill-current" />
-        </button>
+        {isRunningHere ? (
+          <button
+            type="button"
+            onClick={handleStop}
+            title="Pausar"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-red-50 text-red-600 hover:bg-red-100"
+          >
+            <Pause className="h-4 w-4 fill-current" />
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleContinue}
+            title="Continuar"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-[#03A9F4]/10 hover:text-[#03A9F4]"
+          >
+            <Play className="h-4 w-4 fill-current" />
+          </button>
+        )}
 
         <DropdownMenu>
           <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-slate-100">

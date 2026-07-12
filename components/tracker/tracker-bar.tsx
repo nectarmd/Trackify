@@ -26,11 +26,13 @@ export function TrackerBar({
   tags,
   running,
   onEntryFinished,
+  onStarted,
 }: {
   projects: ProjectWithClient[];
   tags: Tag[];
   running: TimeEntryWithRelations | null;
   onEntryFinished?: (entry: TimeEntryWithRelations) => void;
+  onStarted?: () => void;
 }) {
   const router = useRouter();
   const [mode, setMode] = useState<"timer" | "manual">("timer");
@@ -90,6 +92,7 @@ export function TrackerBar({
     // Otimista: o cronômetro já começa a contar.
     const startedAt = new Date().toISOString();
     setRunningStart(startedAt);
+    onStarted?.(); // o timer agora pertence à barra, não a um card
 
     const res = await startTimer({
       description,

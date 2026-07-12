@@ -6,14 +6,17 @@ import type {
   Tag,
   TimeEntryWithRelations,
 } from "@/lib/types";
+import { stopCurrentTimer } from "@/lib/actions/time-entries";
 import { TrackerBar } from "./tracker-bar";
 import { EntryList } from "./entry-list";
 
 /**
- * A barra e a lista eram irmãs e liam os dados direto do servidor, então
- * qualquer ação só refletia na tela quando o revalidatePath voltava — daí a
- * demora. Aqui o estado é compartilhado e atualizado na hora (otimista);
- * quando a resposta do servidor chega, ela reconcilia.
+ * Estado compartilhado entre a barra e a lista: as ações refletem na tela na
+ * hora (otimista) e reconciliam quando o servidor responde.
+ *
+ * `startedFromRowId` guarda DE ONDE o timer foi acionado. Se veio de um card,
+ * o pause aparece naquele próprio card e a barra do topo fica ociosa; se veio
+ * da barra, o controle fica só lá em cima.
  */
 export function TrackerView({
   projects,
@@ -28,6 +31,7 @@ export function TrackerView({
 }) {
   const [localEntries, setLocalEntries] = useState(entries);
   const [localRunning, setLocalRunning] = useState(running);
+  const [startedFromRowId, setStartedFromRowId] = useState<string | null>(null);
 
   useEffect(() => {
     setLocalEntries(entries);
@@ -35,14 +39,21 @@ export function TrackerView({
 
   useEffect(() => {
     setLocalRunning(running);
+    // Sem timer ativo no servidor, não há origem a lembrar.
+    if (!running) setStartedFromRowId(null);
   }, [running]);
 
   function addEntry(entry: TimeEntryWithRelations) {
     setLocalEntries((prev) => [entry, ...prev.filter((e) => e.id !== entry.id)]);
   }
 
-  // "Continuar": inicia um novo timer com os dados da entrada clicada.
+  function removeEntry(id: string) {
+    setLocalEntries((prev) => prev.filter((e) => e.id !== id));
+  }
+
+  // "Continuar" a partir de um card: o timer passa a rodar naquele card.
   function continueFrom(entry: TimeEntryWithRelations) {
+    setStartedFromRowId(entry.id);
     setLocalRunning({
       ...entry,
       id: `temp-${entry.id}`,
@@ -51,8 +62,15 @@ export function TrackerView({
     });
   }
 
-  function removeEntry(id: string) {
-    setLocalEntries((prev) => prev.filter((e) => e.id !== id));
+  // Pause acionado no próprio card.
+  async function stopFromRow() {
+    const current = localRunning;
+    setStartedFromRowId(null);
+    setLocalRunning(null);
+    if (current) {
+      addEntry({ ...current, end_time: new Date().toISOString() });
+    }
+    await stopCurrentTimer();
   }
 
   return (
@@ -60,14 +78,18 @@ export function TrackerView({
       <TrackerBar
         projects={projects}
         tags={tags}
-        running={localRunning}
+        // Se o timer nasceu num card, a barra do topo não o assume.
+        running={startedFromRowId ? null : localRunning}
         onEntryFinished={addEntry}
+        onStarted={() => setStartedFromRowId(null)}
       />
       <EntryList
         entries={localEntries}
         projects={projects}
         tags={tags}
+        runningRowId={startedFromRowId}
         onContinue={continueFrom}
+        onStopRow={stopFromRow}
         onDeleted={removeEntry}
       />
     </>

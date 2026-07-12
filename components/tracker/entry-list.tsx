@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import {
+  startOfDay,
+  endOfDay,
   startOfWeek,
   endOfWeek,
   startOfMonth,
@@ -50,13 +52,17 @@ export function EntryList({
   entries,
   projects,
   tags,
+  runningRowId,
   onContinue,
+  onStopRow,
   onDeleted,
 }: {
   entries: TimeEntryWithRelations[];
   projects: ProjectWithClient[];
   tags: Tag[];
+  runningRowId?: string | null;
   onContinue?: (entry: TimeEntryWithRelations) => void;
+  onStopRow?: () => void;
   onDeleted?: (id: string) => void;
 }) {
   const [mode, setMode] = useState<GroupMode>("day");
@@ -80,9 +86,9 @@ export function EntryList({
     let rangeEnd: Date;
     let label: string;
     if (mode === "day") {
-      rangeStart = startOfWeek(now, weekOpts);
-      rangeEnd = endOfWeek(now, weekOpts);
-      label = "Total desta semana";
+      rangeStart = startOfDay(now);
+      rangeEnd = endOfDay(now);
+      label = "Total do dia";
     } else if (mode === "week") {
       rangeStart = startOfWeek(now, weekOpts);
       rangeEnd = endOfWeek(now, weekOpts);
@@ -171,7 +177,9 @@ export function EntryList({
                   entry={e}
                   projects={projects}
                   tags={tags}
+                  isRunningHere={runningRowId === e.id}
                   onContinue={onContinue}
+                  onStopRow={onStopRow}
                   onDeleted={onDeleted}
                 />
               ))}
