@@ -19,25 +19,39 @@ import {
   ClipboardCheck,
   Monitor,
   Building2,
+  Settings,
   type LucideIcon,
 } from "lucide-react";
+import type { PermissionKey, Permissions } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 
-type NavItem = { href: string; label: string; icon: LucideIcon };
+/** `need` = permissão exigida; `adminOnly` = só admin vê. */
+type NavItem = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  need?: PermissionKey;
+  adminOnly?: boolean;
+};
 
 const mainNav: NavItem[] = [
   // Rastreador é a página inicial do app: vem primeiro.
   { href: "/tracker", label: "RASTREADOR", icon: Clock },
-  { href: "/planilha", label: "PLANILHA", icon: Table2 },
-  { href: "/calendario", label: "CALENDÁRIO", icon: Calendar },
-  { href: "/planejador", label: "PLANEJADOR", icon: ClipboardList },
-  { href: "/despesas", label: "DESPESAS", icon: Receipt },
+  { href: "/planilha", label: "PLANILHA", icon: Table2, need: "timesheet" },
+  { href: "/calendario", label: "CALENDÁRIO", icon: Calendar, need: "calendar" },
+  {
+    href: "/planejador",
+    label: "PLANEJADOR",
+    icon: ClipboardList,
+    need: "planner",
+  },
+  { href: "/despesas", label: "DESPESAS", icon: Receipt, need: "expenses" },
   { href: "/folgas", label: "FOLGAS", icon: Plane },
 ];
 
 const analyzeNav: NavItem[] = [
-  { href: "/painel", label: "PAINEL", icon: LayoutDashboard },
-  { href: "/reports", label: "RELATÓRIOS", icon: BarChart3 },
+  { href: "/painel", label: "PAINEL", icon: LayoutDashboard, need: "reports" },
+  { href: "/reports", label: "RELATÓRIOS", icon: BarChart3, need: "reports" },
   { href: "/atividade", label: "ATIVIDADE", icon: Activity },
 ];
 
@@ -46,6 +60,12 @@ const manageNav: NavItem[] = [
   { href: "/clients", label: "CLIENTES", icon: Users },
   { href: "/tags", label: "TAGS", icon: TagIcon },
   { href: "/equipes", label: "EQUIPES", icon: UsersRound },
+  {
+    href: "/configuracoes",
+    label: "CONFIGURAÇÕES",
+    icon: Settings,
+    adminOnly: true,
+  },
   { href: "/aprovacoes", label: "APROVAÇÕES", icon: ClipboardCheck },
   { href: "/quiosques", label: "QUIOSQUES", icon: Monitor },
 ];
@@ -87,13 +107,26 @@ function isActive(pathname: string, href: string) {
 export function Sidebar({
   className,
   workspaceName,
+  permissions,
+  isAdmin,
   onNavigate,
 }: {
   className?: string;
   workspaceName?: string;
+  permissions?: Permissions;
+  isAdmin?: boolean;
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
+
+  // O menu é só o reflexo do que o RLS já garante no banco.
+  function visible(items: NavItem[]) {
+    return items.filter((item) => {
+      if (item.adminOnly && !isAdmin) return false;
+      if (item.need && permissions && !permissions[item.need]) return false;
+      return true;
+    });
+  }
 
   return (
     <aside
@@ -112,7 +145,7 @@ export function Sidebar({
       )}
 
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
-        {mainNav.map((item) => (
+        {visible(mainNav).map((item) => (
           <NavLink
             key={item.href}
             item={item}
@@ -124,7 +157,7 @@ export function Sidebar({
         <p className="px-3 pb-1 pt-5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
           Analisar
         </p>
-        {analyzeNav.map((item) => (
+        {visible(analyzeNav).map((item) => (
           <NavLink
             key={item.href}
             item={item}
@@ -136,7 +169,7 @@ export function Sidebar({
         <p className="px-3 pb-1 pt-5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
           Gerenciar
         </p>
-        {manageNav.map((item) => (
+        {visible(manageNav).map((item) => (
           <NavLink
             key={item.href}
             item={item}

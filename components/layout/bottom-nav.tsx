@@ -10,16 +10,22 @@ import {
   FolderKanban,
   type LucideIcon,
 } from "lucide-react";
+import type { PermissionKey, Permissions } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 
-type NavItem = { href: string; label: string; icon: LucideIcon };
+type NavItem = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  need?: PermissionKey;
+};
 
 // Rastreador é a página inicial: fica no centro (3º de 5), à mão do polegar.
 const items: NavItem[] = [
-  { href: "/planilha", label: "Planilha", icon: Table2 },
-  { href: "/calendario", label: "Calendário", icon: Calendar },
+  { href: "/planilha", label: "Planilha", icon: Table2, need: "timesheet" },
+  { href: "/calendario", label: "Calendário", icon: Calendar, need: "calendar" },
   { href: "/tracker", label: "Rastreador", icon: Clock },
-  { href: "/reports", label: "Relatórios", icon: BarChart3 },
+  { href: "/reports", label: "Relatórios", icon: BarChart3, need: "reports" },
   { href: "/projects", label: "Projetos", icon: FolderKanban },
 ];
 
@@ -27,12 +33,16 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(href + "/");
 }
 
-export function BottomNav() {
+export function BottomNav({ permissions }: { permissions?: Permissions }) {
   const pathname = usePathname();
+
+  const visible = items.filter(
+    (i) => !i.need || !permissions || permissions[i.need]
+  );
 
   return (
     <nav className="flex shrink-0 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden">
-      {items.map((item) => {
+      {visible.map((item) => {
         const Icon = item.icon;
         const active = isActive(pathname, item.href);
         return (

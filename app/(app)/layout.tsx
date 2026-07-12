@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { getCurrentWorkspace } from "@/lib/workspace";
+import { getPermissions } from "@/lib/permissions-server";
 import { AppShell } from "@/components/layout/app-shell";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +14,10 @@ export default async function AppLayout({
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const workspace = await getCurrentWorkspace();
+  const [workspace, permissions] = await Promise.all([
+    getCurrentWorkspace(),
+    getPermissions(),
+  ]);
 
   const meta = (user.user_metadata ?? {}) as {
     full_name?: string;
@@ -26,6 +30,8 @@ export default async function AppLayout({
       fullName={meta.full_name}
       avatarUrl={meta.avatar_url ?? null}
       workspaceName={workspace?.name}
+      permissions={permissions}
+      isAdmin={workspace?.role === "admin"}
     >
       {children}
     </AppShell>

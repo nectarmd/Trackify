@@ -1,3 +1,4 @@
+import { requirePermission } from "@/lib/guard";
 import { getExpenses, getProjects } from "@/lib/queries";
 import { PageHeader } from "@/components/layout/page-header";
 import { ExpensesClient } from "@/components/expenses/expenses-client";
@@ -5,6 +6,8 @@ import { ExpensesClient } from "@/components/expenses/expenses-client";
 export const dynamic = "force-dynamic";
 
 export default async function DespesasPage() {
+  await requirePermission("expenses");
+
   const [expenses, projects] = await Promise.all([
     getExpenses(),
     getProjects(false),

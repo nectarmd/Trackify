@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { Permissions } from "@/lib/permissions";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 import { BottomNav } from "@/components/layout/bottom-nav";
@@ -10,12 +11,16 @@ export function AppShell({
   fullName,
   avatarUrl,
   workspaceName,
+  permissions,
+  isAdmin,
   children,
 }: {
   email: string;
   fullName?: string;
   avatarUrl?: string | null;
   workspaceName?: string;
+  permissions?: Permissions;
+  isAdmin?: boolean;
   children: React.ReactNode;
 }) {
   // Gaveta no mobile; colapso no desktop.
@@ -43,7 +48,12 @@ export function AppShell({
 
       <div className="relative flex min-h-0 flex-1">
         {desktopOpen && (
-          <Sidebar className="hidden md:flex" workspaceName={workspaceName} />
+          <Sidebar
+            className="hidden md:flex"
+            workspaceName={workspaceName}
+            permissions={permissions}
+            isAdmin={isAdmin}
+          />
         )}
 
         {mobileOpen && (
@@ -57,6 +67,8 @@ export function AppShell({
             <Sidebar
               className="absolute inset-y-0 left-0 z-50 shadow-xl md:hidden"
               workspaceName={workspaceName}
+              permissions={permissions}
+              isAdmin={isAdmin}
               onNavigate={() => setMobileOpen(false)}
             />
           </>
@@ -67,7 +79,7 @@ export function AppShell({
         </main>
       </div>
 
-      <BottomNav />
+      <BottomNav permissions={permissions} />
     </div>
   );
 }

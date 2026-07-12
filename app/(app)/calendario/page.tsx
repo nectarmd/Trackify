@@ -1,3 +1,4 @@
+import { requirePermission } from "@/lib/guard";
 import Link from "next/link";
 import {
   startOfWeek,
@@ -33,6 +34,8 @@ export default async function CalendarioPage({
 }: {
   searchParams: Promise<{ start?: string }>;
 }) {
+  await requirePermission("calendar");
+
   const params = await searchParams;
   const weekStart = parseWeekStart(params.start);
   const weekEnd = endOfWeek(weekStart, weekOpts);

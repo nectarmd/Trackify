@@ -1,3 +1,4 @@
+import { requirePermission } from "@/lib/guard";
 import { getPlans, getProjects } from "@/lib/queries";
 import { PageHeader } from "@/components/layout/page-header";
 import { PlannerClient } from "@/components/planner/planner-client";
@@ -5,6 +6,8 @@ import { PlannerClient } from "@/components/planner/planner-client";
 export const dynamic = "force-dynamic";
 
 export default async function PlanejadorPage() {
+  await requirePermission("planner");
+
   const [plans, projects] = await Promise.all([
     getPlans(),
     getProjects(false),

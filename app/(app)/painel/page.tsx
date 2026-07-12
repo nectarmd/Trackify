@@ -1,3 +1,4 @@
+import { requirePermission } from "@/lib/guard";
 import { eachDayOfInterval, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { getEntriesInRange, getProjects } from "@/lib/queries";
@@ -8,6 +9,8 @@ import { DashboardView } from "@/components/dashboard/dashboard-view";
 export const dynamic = "force-dynamic";
 
 export default async function PainelPage() {
+  await requirePermission("reports");
+
   const { start, end } = periodRange("this_week");
 
   const [entries, projects] = await Promise.all([

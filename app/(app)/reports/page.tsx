@@ -1,3 +1,4 @@
+import { requirePermission } from "@/lib/guard";
 import { getEntriesInRange, getProjects } from "@/lib/queries";
 import { periodRange, type PeriodKey } from "@/lib/time";
 import { PageHeader } from "@/components/layout/page-header";
@@ -23,6 +24,8 @@ export default async function ReportsPage({
     end?: string;
   }>;
 }) {
+  await requirePermission("reports");
+
   const params = await searchParams;
   const period: PeriodKey = VALID_PERIODS.includes(params.period as PeriodKey)
     ? (params.period as PeriodKey)
