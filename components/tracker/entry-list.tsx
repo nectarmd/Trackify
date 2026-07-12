@@ -53,6 +53,7 @@ export function EntryList({
   projects,
   tags,
   runningRowId,
+  runningStart,
   onContinue,
   onStopRow,
   onDeleted,
@@ -61,6 +62,7 @@ export function EntryList({
   projects: ProjectWithClient[];
   tags: Tag[];
   runningRowId?: string | null;
+  runningStart?: string | null;
   onContinue?: (entry: TimeEntryWithRelations) => void;
   onStopRow?: () => void;
   onDeleted?: (id: string) => void;
@@ -178,6 +180,7 @@ export function EntryList({
                   projects={projects}
                   tags={tags}
                   isRunningHere={runningRowId === e.id}
+                  runningStart={runningRowId === e.id ? runningStart : null}
                   onContinue={onContinue}
                   onStopRow={onStopRow}
                   onDeleted={onDeleted}

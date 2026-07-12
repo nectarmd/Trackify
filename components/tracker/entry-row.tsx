@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   DollarSign,
   Play,
@@ -17,6 +17,7 @@ import {
   deleteEntry,
 } from "@/lib/actions/time-entries";
 import { entryDurationSeconds, formatDuration, formatTime } from "@/lib/time";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +31,7 @@ export function EntryRow({
   projects,
   tags,
   isRunningHere,
+  runningStart,
   onContinue,
   onStopRow,
   onDeleted,
@@ -38,14 +40,29 @@ export function EntryRow({
   projects: ProjectWithClient[];
   tags: Tag[];
   isRunningHere?: boolean;
+  runningStart?: string | null;
   onContinue?: (entry: TimeEntryWithRelations) => void;
   onStopRow?: () => void;
   onDeleted?: (id: string) => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
 
-  const duration = entryDurationSeconds(entry.start_time, entry.end_time);
+  // Quando o timer foi acionado neste card, a duração passa a contar ao vivo
+  // (antes mostrava a duração fixa da entrada já concluída).
+  useEffect(() => {
+    if (!isRunningHere || !runningStart) return;
+    const update = () => setElapsed(entryDurationSeconds(runningStart, null));
+    update();
+    const i = setInterval(update, 1000);
+    return () => clearInterval(i);
+  }, [isRunningHere, runningStart]);
+
+  const duration =
+    isRunningHere && runningStart
+      ? elapsed
+      : entryDurationSeconds(entry.start_time, entry.end_time);
 
   // Todas as actions abaixo já chamam revalidatePath("/tracker"), que devolve a
   // árvore atualizada. O router.refresh() que existia aqui refazia a página
@@ -115,7 +132,12 @@ export function EntryRow({
           {formatTime(entry.start_time)} – {formatTime(entry.end_time!)}
         </div>
 
-        <div className="w-20 shrink-0 text-right font-mono text-sm font-semibold tabular-nums">
+        <div
+          className={cn(
+            "w-20 shrink-0 text-right font-mono text-sm font-semibold tabular-nums",
+            isRunningHere && "text-[#03A9F4]"
+          )}
+        >
           {formatDuration(duration)}
         </div>
 

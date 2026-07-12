@@ -88,6 +88,7 @@ export function TrackerView({
         projects={projects}
         tags={tags}
         runningRowId={startedFromRowId}
+        runningStart={localRunning?.start_time ?? null}
         onContinue={continueFrom}
         onStopRow={stopFromRow}
         onDeleted={removeEntry}
