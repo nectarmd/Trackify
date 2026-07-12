@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type {
   ProjectWithClient,
   Tag,
@@ -40,15 +40,23 @@ export function TrackerView({
   const [localRunning, setLocalRunning] = useState(running);
   const [startedFromRowId, setStartedFromRowId] = useState<string | null>(null);
 
-  useEffect(() => {
+  // Reconciliação com o servidor DURANTE a renderização — não num efeito.
+  // Sincronizar prop→estado via useEffect provoca um render extra em cascata
+  // (React re-renderiza, roda o efeito, muda o estado, re-renderiza de novo).
+  // Comparar com o valor anterior aqui resolve num único passe.
+  const [prevEntries, setPrevEntries] = useState(entries);
+  if (prevEntries !== entries) {
+    setPrevEntries(entries);
     setLocalEntries(entries);
-  }, [entries]);
+  }
 
-  useEffect(() => {
+  const [prevRunning, setPrevRunning] = useState(running);
+  if (prevRunning !== running) {
+    setPrevRunning(running);
     setLocalRunning(running);
     // Sem timer ativo no servidor, não há origem a lembrar.
     if (!running) setStartedFromRowId(null);
-  }, [running]);
+  }
 
   function addEntry(entry: TimeEntryWithRelations) {
     setLocalEntries((prev) => [entry, ...prev.filter((e) => e.id !== entry.id)]);

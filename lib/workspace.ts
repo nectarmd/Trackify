@@ -1,5 +1,6 @@
 import { cache } from "react";
-import { createClient, getCurrentUser } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
+import { normalizePermissions, type Permissions } from "@/lib/permissions";
 
 export type CurrentWorkspace = {
   id: string;
@@ -8,51 +9,57 @@ export type CurrentWorkspace = {
   isOwner: boolean;
 };
 
+export type WorkspaceContext = CurrentWorkspace & {
+  /** O que os MEMBROS podem. Admin não é afetado por isto. */
+  memberPermissions: Permissions;
+};
+
 /**
- * Workspace ativo do usuário.
+ * Contexto do workspace numa ÚNICA ida ao banco.
  *
- * Antes de resolver, "reivindica" convites pendentes: quem JÁ tinha conta e foi
- * convidado por e-mail é vinculado aqui (o gatilho do banco só cobre quem se
- * cadastra depois do convite).
+ * Antes eram três, em série (~0,3s cada), a cada carregamento de página:
+ * vincular convites pendentes, descobrir o workspace e ler as permissões.
+ * A função my_workspace() faz os três no banco e devolve tudo junto.
  *
- * cache(): uma resolução por requisição, mesmo com layout + página + actions
- * pedindo o workspace.
+ * cache(): uma chamada por requisição, mesmo com layout, página e actions
+ * pedindo o contexto.
  */
-export const getCurrentWorkspace = cache(
-  async (): Promise<CurrentWorkspace | null> => {
-    const user = await getCurrentUser();
-    if (!user?.email) return null;
-
+export const getWorkspaceContext = cache(
+  async (): Promise<WorkspaceContext | null> => {
     const supabase = await createClient();
+    const { data, error } = await supabase.rpc("my_workspace");
 
-    // Vincula convites pendentes deste e-mail. Roda no banco (SECURITY DEFINER)
-    // porque o convidado ainda não é membro e o RLS o barraria aqui.
-    await supabase.rpc("claim_my_invites");
+    if (error) return null;
 
-    // Preferência: o workspace que ele possui; senão, o primeiro em que é membro.
-    const { data } = await supabase
-      .from("workspace_members")
-      .select("role, workspace:workspaces ( id, name, owner_id )")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: true });
+    const row = (Array.isArray(data) ? data[0] : data) as
+      | {
+          id: string;
+          name: string;
+          role: "admin" | "member";
+          is_owner: boolean;
+          member_permissions: unknown;
+        }
+      | undefined;
 
-    const rows = (data ?? []) as unknown as {
-      role: "admin" | "member";
-      workspace: { id: string; name: string; owner_id: string } | null;
-    }[];
-
-    const valid = rows.filter((r) => r.workspace);
-    if (valid.length === 0) return null;
-
-    const owned = valid.find((r) => r.workspace!.owner_id === user.id);
-    const chosen = owned ?? valid[0];
+    if (!row?.id) return null;
 
     return {
-      id: chosen.workspace!.id,
-      name: chosen.workspace!.name,
-      role: chosen.role,
-      isOwner: chosen.workspace!.owner_id === user.id,
+      id: row.id,
+      name: row.name,
+      role: row.role,
+      isOwner: row.is_owner,
+      memberPermissions: normalizePermissions(row.member_permissions),
     };
+  }
+);
+
+export const getCurrentWorkspace = cache(
+  async (): Promise<CurrentWorkspace | null> => {
+    const ctx = await getWorkspaceContext();
+    if (!ctx) return null;
+    const { memberPermissions, ...ws } = ctx;
+    void memberPermissions;
+    return ws;
   }
 );
 

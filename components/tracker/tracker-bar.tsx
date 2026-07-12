@@ -75,8 +75,11 @@ export function TrackerBar({
     running?.start_time ?? null
   );
 
-  // Sincroniza estado quando o timer ativo muda (após refresh).
-  useEffect(() => {
+  // Reconciliação com o servidor DURANTE a renderização, não num efeito:
+  // prop→estado via useEffect provoca um render extra em cascata.
+  const [prevRunning, setPrevRunning] = useState(running);
+  if (prevRunning !== running) {
+    setPrevRunning(running);
     setRunningStart(running?.start_time ?? null);
     if (running) {
       setDescription(running.description);
@@ -84,19 +87,19 @@ export function TrackerBar({
       setTagIds(running.tags.map((t) => t.id));
       setBillable(running.billable);
     }
-  }, [running]);
+  }
 
-  // Tick do timer.
+  // Tick do timer. Sem setState quando parado: o zero é derivado na renderização
+  // (ver `displayElapsed`), o que evita mais um render desnecessário.
   useEffect(() => {
-    if (!runningStart) {
-      setElapsed(0);
-      return;
-    }
+    if (!runningStart) return;
     const update = () => setElapsed(entryDurationSeconds(runningStart, null));
     update();
     const i = setInterval(update, 1000);
     return () => clearInterval(i);
   }, [runningStart]);
+
+  const displayElapsed = runningStart ? elapsed : 0;
 
   async function onStart() {
     if (busy) return;
@@ -282,7 +285,7 @@ export function TrackerBar({
                 </Button>
               )}
               <span className="font-mono text-xl font-semibold tabular-nums text-slate-800">
-                {formatDuration(elapsed)}
+                {formatDuration(displayElapsed)}
               </span>
             </>
           ) : (
