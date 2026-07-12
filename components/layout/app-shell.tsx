@@ -23,7 +23,10 @@ export function AppShell({
   }
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-slate-50 text-slate-900">
+    // fixed inset-0: prende o shell à viewport. Com h-dvh no fluxo normal, o
+    // iOS/PWA recalculava a altura ao navegar e empurrava o menu inferior para
+    // fora da tela. Fixo, o menu é sempre o último item visível.
+    <div className="fixed inset-0 flex flex-col overflow-hidden bg-slate-50 text-slate-900">
       <Topbar email={email} onToggleSidebar={toggleSidebar} />
 
       <div className="relative flex min-h-0 flex-1">

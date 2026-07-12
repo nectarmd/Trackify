@@ -7,7 +7,8 @@ import type {
   TimeEntryWithRelations,
   ExpenseWithProject,
   PlanWithProject,
-  TeamMember,
+  WorkspaceMember,
+  WorkspaceInvite,
 } from "@/lib/types";
 
 const ENTRY_SELECT = `
@@ -118,11 +119,21 @@ export async function getPlans(): Promise<PlanWithProject[]> {
   return (data as unknown as PlanWithProject[]) ?? [];
 }
 
-export async function getTeamMembers(): Promise<TeamMember[]> {
+export async function getWorkspaceMembers(): Promise<WorkspaceMember[]> {
   const supabase = await createClient();
   const { data } = await supabase
-    .from("team_members")
+    .from("workspace_members")
     .select("*")
     .order("created_at", { ascending: true });
-  return (data as TeamMember[]) ?? [];
+  return (data as WorkspaceMember[]) ?? [];
+}
+
+export async function getPendingInvites(): Promise<WorkspaceInvite[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("workspace_invites")
+    .select("*")
+    .eq("status", "pending")
+    .order("created_at", { ascending: true });
+  return (data as WorkspaceInvite[]) ?? [];
 }

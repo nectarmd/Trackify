@@ -2,16 +2,18 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
+import { requireWorkspace } from "@/lib/workspace";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ActionResult } from "./result";
 
 async function requireUser() {
-  const [supabase, user] = await Promise.all([
+  const [supabase, user, workspace] = await Promise.all([
     createClient(),
     getCurrentUser(),
+    requireWorkspace(),
   ]);
   if (!user) throw new Error("Não autenticado");
-  return { supabase, user };
+  return { supabase, user, workspace };
 }
 
 async function syncTags(
@@ -51,7 +53,7 @@ export type EntryInput = {
 };
 
 export async function startTimer(input: EntryInput): Promise<ActionResult> {
-  const { supabase, user } = await requireUser();
+  const { supabase, user, workspace } = await requireUser();
 
   // Garante um único timer rodando.
   await stopRunning(supabase, user.id);
@@ -60,6 +62,7 @@ export async function startTimer(input: EntryInput): Promise<ActionResult> {
     .from("time_entries")
     .insert({
       user_id: user.id,
+      workspace_id: workspace.id,
       description: input.description ?? "",
       project_id: input.project_id,
       billable: input.billable,
@@ -128,11 +131,12 @@ export async function createManualEntry(
     return { error: "O horário de fim deve ser depois do início." };
   }
 
-  const { supabase, user } = await requireUser();
+  const { supabase, user, workspace } = await requireUser();
   const { data, error } = await supabase
     .from("time_entries")
     .insert({
       user_id: user.id,
+      workspace_id: workspace.id,
       description: input.description ?? "",
       project_id: input.project_id,
       billable: input.billable,
@@ -215,7 +219,7 @@ async function loadEntryWithTags(
 }
 
 export async function duplicateEntry(id: string): Promise<ActionResult> {
-  const { supabase, user } = await requireUser();
+  const { supabase, user, workspace } = await requireUser();
   const src = await loadEntryWithTags(supabase, id);
   if (!src) return { error: "Entrada não encontrada." };
 
@@ -223,6 +227,7 @@ export async function duplicateEntry(id: string): Promise<ActionResult> {
     .from("time_entries")
     .insert({
       user_id: user.id,
+      workspace_id: workspace.id,
       description: src.description,
       project_id: src.project_id,
       billable: src.billable,

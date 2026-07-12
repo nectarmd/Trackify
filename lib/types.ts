@@ -77,13 +77,25 @@ export type PlanWithProject = Plan & {
 
 export type TeamMemberRole = "admin" | "member";
 
-export type TeamMember = {
+/** Pessoa já vinculada ao workspace (tem conta e acesso). */
+export type WorkspaceMember = {
   id: string;
+  workspace_id: string;
   user_id: string;
+  email: string | null;
+  name: string | null;
+  role: TeamMemberRole;
+  created_at: string;
+};
+
+/** Convite ainda não aceito: não dá acesso a nada até virar membro. */
+export type WorkspaceInvite = {
+  id: string;
+  workspace_id: string;
   email: string;
   name: string | null;
   role: TeamMemberRole;
-  status: string;
+  status: "pending" | "accepted";
   created_at: string;
 };
 

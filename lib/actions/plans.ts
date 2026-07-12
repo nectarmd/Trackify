@@ -1,16 +1,18 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getCurrentUser } from "@/lib/supabase/server";
+import { requireWorkspace } from "@/lib/workspace";
 import type { ActionResult } from "./result";
 
 async function requireUser() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const [supabase, user, workspace] = await Promise.all([
+    createClient(),
+    getCurrentUser(),
+    requireWorkspace(),
+  ]);
   if (!user) throw new Error("Não autenticado");
-  return { supabase, user };
+  return { supabase, user, workspace };
 }
 
 type PlanInput = {
@@ -48,10 +50,10 @@ export async function createPlan(formData: FormData): Promise<ActionResult> {
   const parsed = parsePlan(formData);
   if ("error" in parsed) return parsed;
 
-  const { supabase, user } = await requireUser();
+  const { supabase, user, workspace } = await requireUser();
   const { error } = await supabase
     .from("plans")
-    .insert({ ...parsed, user_id: user.id });
+    .insert({ ...parsed, user_id: user.id, workspace_id: workspace.id });
   if (error) return { error: "Não foi possível criar o planejamento." };
 
   revalidatePath("/planejador");
