@@ -12,6 +12,18 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
   title: "Trackify - Controle de tempo",
   description: "Rastreie seu tempo de forma simples.",
+  applicationName: "Trackify",
+  // O Safari NÃO lê `display: standalone` do manifesto — ele depende destas
+  // metatags. Sem elas, o app abre com a barra do navegador mesmo instalado.
+  appleWebApp: {
+    capable: true,
+    title: "Trackify",
+    statusBarStyle: "black-translucent",
+  },
+  icons: {
+    icon: "/icon-192.png",
+    apple: "/apple-icon.png",
+  },
 };
 
 // viewportFit: "cover" é o que faz o iOS expor as safe areas (env(safe-area-inset-*)),
@@ -20,6 +32,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  themeColor: "#03A9F4",
 };
 
 export default function RootLayout({
