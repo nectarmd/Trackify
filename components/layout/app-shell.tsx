@@ -7,9 +7,15 @@ import { BottomNav } from "@/components/layout/bottom-nav";
 
 export function AppShell({
   email,
+  fullName,
+  avatarUrl,
+  workspaceName,
   children,
 }: {
   email: string;
+  fullName?: string;
+  avatarUrl?: string | null;
+  workspaceName?: string;
   children: React.ReactNode;
 }) {
   // Gaveta no mobile; colapso no desktop.
@@ -27,7 +33,13 @@ export function AppShell({
     // iOS/PWA recalculava a altura ao navegar e empurrava o menu inferior para
     // fora da tela. Fixo, o menu é sempre o último item visível.
     <div className="fixed inset-0 flex flex-col overflow-hidden bg-slate-50 text-slate-900">
-      <Topbar email={email} onToggleSidebar={toggleSidebar} />
+      <Topbar
+        email={email}
+        fullName={fullName}
+        avatarUrl={avatarUrl}
+        workspaceName={workspaceName}
+        onToggleSidebar={toggleSidebar}
+      />
 
       <div className="relative flex min-h-0 flex-1">
         {desktopOpen && <Sidebar className="hidden md:flex" />}
