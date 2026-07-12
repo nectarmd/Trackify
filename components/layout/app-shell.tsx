@@ -23,7 +23,7 @@ export function AppShell({
   }
 
   return (
-    <div className="flex h-screen flex-col bg-slate-50 text-slate-900">
+    <div className="flex h-dvh flex-col overflow-hidden bg-slate-50 text-slate-900">
       <Topbar email={email} onToggleSidebar={toggleSidebar} />
 
       <div className="relative flex min-h-0 flex-1">

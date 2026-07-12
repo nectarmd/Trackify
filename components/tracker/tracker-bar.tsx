@@ -51,8 +51,15 @@ export function TrackerBar({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Espelho local do timer: permite reagir na hora ao clique (otimista) e
+  // depois reconciliar com o que o servidor devolve.
+  const [runningStart, setRunningStart] = useState<string | null>(
+    running?.start_time ?? null
+  );
+
   // Sincroniza estado quando o timer ativo muda (após refresh).
   useEffect(() => {
+    setRunningStart(running?.start_time ?? null);
     if (running) {
       setDescription(running.description);
       setProjectId(running.project_id);
@@ -63,20 +70,25 @@ export function TrackerBar({
 
   // Tick do timer.
   useEffect(() => {
-    if (!running) {
+    if (!runningStart) {
       setElapsed(0);
       return;
     }
-    const update = () =>
-      setElapsed(entryDurationSeconds(running.start_time, null));
+    const update = () => setElapsed(entryDurationSeconds(runningStart, null));
     update();
     const i = setInterval(update, 1000);
     return () => clearInterval(i);
-  }, [running]);
+  }, [runningStart]);
 
   async function onStart() {
+    if (busy) return;
     setBusy(true);
     setError(null);
+
+    // Otimista: o cronômetro já começa a contar.
+    const startedAt = new Date().toISOString();
+    setRunningStart(startedAt);
+
     const res = await startTimer({
       description,
       project_id: projectId,
@@ -84,19 +96,28 @@ export function TrackerBar({
       tag_ids: tagIds,
     });
     setBusy(false);
-    if (res?.error) setError(res.error);
-    else router.refresh();
+
+    if (res?.error) {
+      setRunningStart(null); // desfaz o otimismo
+      setError(res.error);
+      return;
+    }
+    router.refresh();
   }
 
   async function onStop() {
-    if (!running) return;
+    if (!running || busy) return;
     setBusy(true);
-    await stopTimer(running.id);
-    setBusy(false);
+
+    // Otimista: para na hora e limpa os campos.
+    setRunningStart(null);
     setDescription("");
     setProjectId(null);
     setTagIds([]);
     setBillable(false);
+
+    await stopTimer(running.id);
+    setBusy(false);
     router.refresh();
   }
 
@@ -121,7 +142,7 @@ export function TrackerBar({
     router.refresh();
   }
 
-  const isRunning = Boolean(running);
+  const isRunning = runningStart !== null;
 
   return (
     <div className="rounded-lg border bg-white shadow-sm">
@@ -172,7 +193,6 @@ export function TrackerBar({
               {isRunning ? (
                 <Button
                   onClick={onStop}
-                  disabled={busy}
                   className="h-10 min-w-24 rounded-md bg-red-500 px-5 font-semibold hover:bg-red-600"
                 >
                   <Square className="mr-1.5 h-4 w-4 fill-white" /> PARAR
@@ -180,7 +200,6 @@ export function TrackerBar({
               ) : (
                 <Button
                   onClick={onStart}
-                  disabled={busy}
                   className="h-10 min-w-24 rounded-md px-5 font-semibold"
                 >
                   <Play className="mr-1.5 h-4 w-4 fill-white" /> INICIAR

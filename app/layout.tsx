@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 
@@ -12,6 +12,14 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
   title: "Trackify - Controle de tempo",
   description: "Rastreie seu tempo de forma simples.",
+};
+
+// viewportFit: "cover" é o que faz o iOS expor as safe areas (env(safe-area-inset-*)),
+// necessárias para o menu inferior não ficar atrás da barra do Safari.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

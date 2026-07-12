@@ -30,7 +30,7 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex shrink-0 border-t border-slate-200 bg-white md:hidden">
+    <nav className="flex shrink-0 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden">
       {items.map((item) => {
         const Icon = item.icon;
         const active = isActive(pathname, item.href);
