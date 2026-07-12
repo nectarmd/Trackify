@@ -1,15 +1,15 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ActionResult } from "./result";
 
 async function requireUser() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const [supabase, user] = await Promise.all([
+    createClient(),
+    getCurrentUser(),
+  ]);
   if (!user) throw new Error("Não autenticado");
   return { supabase, user };
 }
@@ -71,7 +71,18 @@ export async function startTimer(input: EntryInput): Promise<ActionResult> {
 
   if (error || !data) return { error: "Não foi possível iniciar o timer." };
 
-  await syncTags(supabase, user.id, data.id, input.tag_ids ?? []);
+  // Entrada recém-criada não tem tags a remover: insere direto e evita
+  // um DELETE inútil (um round trip a menos ao banco).
+  const tagIds = Array.from(new Set(input.tag_ids ?? [])).filter(Boolean);
+  if (tagIds.length > 0) {
+    await supabase.from("time_entry_tags").insert(
+      tagIds.map((tag_id) => ({
+        time_entry_id: data.id,
+        tag_id,
+        user_id: user.id,
+      }))
+    );
+  }
 
   revalidatePath("/tracker");
   return { ok: true, id: data.id };

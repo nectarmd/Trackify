@@ -100,9 +100,9 @@ export function TrackerBar({
     if (res?.error) {
       setRunningStart(null); // desfaz o otimismo
       setError(res.error);
-      return;
     }
-    router.refresh();
+    // Sem router.refresh(): o revalidatePath da própria action já devolve a
+    // árvore atualizada. Chamar os dois refazia todo o trabalho duas vezes.
   }
 
   async function onStop() {
@@ -118,7 +118,6 @@ export function TrackerBar({
 
     await stopTimer(running.id);
     setBusy(false);
-    router.refresh();
   }
 
   async function onManualAdd() {

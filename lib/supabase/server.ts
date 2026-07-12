@@ -1,5 +1,19 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { cache } from "react";
+
+/**
+ * auth.getUser() é uma chamada de rede ao Supabase (~0,6s). Layout, página e
+ * actions pediam o usuário separadamente e pagavam esse custo várias vezes na
+ * mesma renderização. O cache() do React deduplica: uma chamada por requisição.
+ */
+export const getCurrentUser = cache(async () => {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return user;
+});
 
 export async function createClient() {
   const cookieStore = await cookies();
