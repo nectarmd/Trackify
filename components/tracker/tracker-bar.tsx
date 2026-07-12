@@ -171,66 +171,100 @@ export function TrackerBar({
 
   return (
     <div className="rounded-lg border bg-white shadow-sm">
-      <div className="flex flex-col gap-3 p-3 lg:flex-row lg:items-center">
-        <Input
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="No que você está trabalhando?"
-          className="flex-1 border-0 text-base shadow-none focus-visible:ring-0"
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && mode === "timer") {
-              if (isRunning) onStop();
-              else onStart();
-            }
-          }}
-        />
-
-        <div className="flex flex-wrap items-center gap-2">
-          <ProjectSelect
-            projects={projects}
-            value={projectId}
-            onChange={setProjectId}
-            className="min-w-40"
+      <div className="flex flex-col gap-3 p-3">
+        {/* Linha de cima: descrição, projeto, tags, cifrão e o alternador
+            relógio/lista (que antes ficava lá na ponta, depois do botão). */}
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+          <Input
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="No que você está trabalhando?"
+            className="flex-1 border-0 text-base shadow-none focus-visible:ring-0"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && mode === "timer") {
+                if (isRunning) onStop();
+                else onStart();
+              }
+            }}
           />
-          <TagSelect tags={tags} value={tagIds} onChange={setTagIds} />
 
-          <button
-            type="button"
-            onClick={() => setBillable((b) => !b)}
-            title="Faturável"
-            className={cn(
-              "flex h-9 w-9 items-center justify-center rounded-md border",
-              billable
-                ? "border-[#03A9F4] bg-[#03A9F4]/10 text-[#03A9F4]"
-                : "border-input text-muted-foreground hover:bg-accent"
-            )}
-          >
-            <DollarSign className="h-4 w-4" />
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <ProjectSelect
+              projects={projects}
+              value={projectId}
+              onChange={setProjectId}
+              className="min-w-40"
+            />
+            <TagSelect tags={tags} value={tagIds} onChange={setTagIds} />
 
-          <div className="mx-1 h-8 w-px bg-border" />
+            <button
+              type="button"
+              onClick={() => setBillable((b) => !b)}
+              title="Faturável"
+              className={cn(
+                "flex h-9 w-9 items-center justify-center rounded-md border",
+                billable
+                  ? "border-[#03A9F4] bg-[#03A9F4]/10 text-[#03A9F4]"
+                  : "border-input text-muted-foreground hover:bg-accent"
+              )}
+            >
+              <DollarSign className="h-4 w-4" />
+            </button>
 
+            <div className="flex shrink-0 overflow-hidden rounded-md border">
+              <button
+                type="button"
+                onClick={() => setMode("timer")}
+                title="Modo timer"
+                className={cn(
+                  "flex h-9 w-9 items-center justify-center",
+                  mode === "timer"
+                    ? "bg-[#03A9F4] text-white"
+                    : "text-muted-foreground hover:bg-accent"
+                )}
+              >
+                <Clock className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode("manual")}
+                title="Modo manual"
+                className={cn(
+                  "flex h-9 w-9 items-center justify-center",
+                  mode === "manual"
+                    ? "bg-[#03A9F4] text-white"
+                    : "text-muted-foreground hover:bg-accent"
+                )}
+              >
+                <List className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Linha de baixo: INICIAR à esquerda, cronômetro logo depois. */}
+        <div className="flex flex-wrap items-center gap-3 border-t border-slate-100 pt-3">
           {mode === "timer" ? (
-            <div className="flex items-center gap-3">
-              <span className="min-w-24 text-center font-mono text-lg font-semibold tabular-nums">
-                {formatDuration(elapsed)}
-              </span>
+            <>
               {isRunning ? (
                 <Button
                   onClick={onStop}
-                  className="h-10 min-w-24 rounded-md bg-red-500 px-5 font-semibold hover:bg-red-600"
+                  className="h-10 min-w-28 rounded-md bg-red-500 px-5 font-semibold hover:bg-red-600"
                 >
                   <Square className="mr-1.5 h-4 w-4 fill-white" /> PARAR
                 </Button>
               ) : (
                 <Button
                   onClick={onStart}
-                  className="h-10 min-w-24 rounded-md px-5 font-semibold"
+                  className="h-10 min-w-28 rounded-md px-5 font-semibold"
                 >
                   <Play className="mr-1.5 h-4 w-4 fill-white" /> INICIAR
                 </Button>
               )}
-            </div>
+              <span className="font-mono text-xl font-semibold tabular-nums text-slate-800">
+                {formatDuration(elapsed)}
+              </span>
+            </>
           ) : (
             <div className="flex flex-wrap items-center gap-2">
               <Input
@@ -257,40 +291,9 @@ export function TrackerBar({
               </Button>
             </div>
           )}
-
-          <div className="ml-1 flex overflow-hidden rounded-md border">
-            <button
-              type="button"
-              onClick={() => setMode("timer")}
-              title="Modo timer"
-              className={cn(
-                "flex h-9 w-9 items-center justify-center",
-                mode === "timer"
-                  ? "bg-[#03A9F4] text-white"
-                  : "text-muted-foreground hover:bg-accent"
-              )}
-            >
-              <Clock className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode("manual")}
-              title="Modo manual"
-              className={cn(
-                "flex h-9 w-9 items-center justify-center",
-                mode === "manual"
-                  ? "bg-[#03A9F4] text-white"
-                  : "text-muted-foreground hover:bg-accent"
-              )}
-            >
-              <List className="h-4 w-4" />
-            </button>
-          </div>
         </div>
       </div>
-      {error && (
-        <p className="px-4 pb-3 text-sm text-red-600">{error}</p>
-      )}
+      {error && <p className="px-4 pb-3 text-sm text-red-600">{error}</p>}
     </div>
   );
 }
