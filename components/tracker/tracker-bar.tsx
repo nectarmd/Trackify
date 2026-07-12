@@ -25,10 +25,12 @@ export function TrackerBar({
   projects,
   tags,
   running,
+  onEntryFinished,
 }: {
   projects: ProjectWithClient[];
   tags: Tag[];
   running: TimeEntryWithRelations | null;
+  onEntryFinished?: (entry: TimeEntryWithRelations) => void;
 }) {
   const router = useRouter();
   const [mode, setMode] = useState<"timer" | "manual">("timer");
@@ -109,8 +111,9 @@ export function TrackerBar({
     if (!running || busy) return;
     setBusy(true);
 
-    // Otimista: para na hora e limpa os campos.
+    // Otimista: para na hora, joga a entrada concluída na lista e limpa.
     setRunningStart(null);
+    onEntryFinished?.({ ...running, end_time: new Date().toISOString() });
     setDescription("");
     setProjectId(null);
     setTagIds([]);
@@ -123,19 +126,39 @@ export function TrackerBar({
   async function onManualAdd() {
     setBusy(true);
     setError(null);
+
+    const start = combine(date, startTime);
+    const end = combine(date, endTime);
+
     const res = await createManualEntry({
       description,
       project_id: projectId,
       billable,
       tag_ids: tagIds,
-      start_time: combine(date, startTime),
-      end_time: combine(date, endTime),
+      start_time: start,
+      end_time: end,
     });
     setBusy(false);
     if (res?.error) {
       setError(res.error);
       return;
     }
+
+    // Otimista: mostra a entrada na lista sem esperar o servidor re-renderizar.
+    // O id vem da action; a reconciliação substitui este objeto pelo do servidor.
+    onEntryFinished?.({
+      id: res?.id ?? crypto.randomUUID(),
+      user_id: "",
+      created_at: new Date().toISOString(),
+      description,
+      project_id: projectId,
+      start_time: start,
+      end_time: end,
+      billable,
+      project: projects.find((p) => p.id === projectId) ?? null,
+      tags: tags.filter((t) => tagIds.includes(t.id)),
+    });
+
     setDescription("");
     setTagIds([]);
     router.refresh();

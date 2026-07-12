@@ -107,16 +107,18 @@ export function EntryList({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3">
-        <div className="flex items-center gap-3">
-          <div className="flex overflow-hidden rounded-md border border-slate-200">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-lg border border-slate-200 bg-white px-4 py-3">
+        <div className="flex min-w-0 items-center gap-3">
+          {/* shrink-0: sem isso o flex espremia esta caixa e o overflow-hidden
+              cortava o último botão ("Mês"). */}
+          <div className="flex shrink-0 overflow-hidden rounded-md border border-slate-200">
             {(Object.keys(MODE_LABELS) as GroupMode[]).map((m) => (
               <button
                 key={m}
                 type="button"
                 onClick={() => setMode(m)}
                 className={cn(
-                  "px-3 py-1.5 text-sm font-medium transition-colors",
+                  "whitespace-nowrap px-3 py-1.5 text-sm font-medium transition-colors",
                   mode === m
                     ? "bg-[#03A9F4] text-white"
                     : "text-slate-600 hover:bg-slate-100"
@@ -126,9 +128,9 @@ export function EntryList({
               </button>
             ))}
           </div>
-          <span className="text-sm text-slate-500">{periodLabel}</span>
+          <span className="truncate text-sm text-slate-500">{periodLabel}</span>
         </div>
-        <span className="font-mono text-lg font-semibold tabular-nums text-slate-800">
+        <span className="shrink-0 font-mono text-lg font-semibold tabular-nums text-slate-800">
           {formatDuration(periodTotal)}
         </span>
       </div>
