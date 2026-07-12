@@ -1,7 +1,12 @@
+import { requirePermission } from "@/lib/guard";
 import { Monitor } from "lucide-react";
 import { ComingSoon } from "@/components/layout/coming-soon";
 
-export default function QuiosquesPage() {
+export default async function QuiosquesPage() {
+  await requirePermission("kiosks");
+
+  await requirePermission("kiosks");
+
   return (
     <ComingSoon
       icon={Monitor}

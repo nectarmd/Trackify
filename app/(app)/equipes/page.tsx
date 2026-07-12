@@ -1,3 +1,4 @@
+import { requirePermission } from "@/lib/guard";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { getCurrentWorkspace } from "@/lib/workspace";
@@ -8,6 +9,8 @@ import { TeamClient } from "@/components/team/team-client";
 export const dynamic = "force-dynamic";
 
 export default async function EquipesPage() {
+  await requirePermission("team_view");
+
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 

@@ -1,7 +1,12 @@
+import { requirePermission } from "@/lib/guard";
 import { Plane } from "lucide-react";
 import { ComingSoon } from "@/components/layout/coming-soon";
 
-export default function FolgasPage() {
+export default async function FolgasPage() {
+  await requirePermission("time_off");
+
+  await requirePermission("time_off");
+
   return (
     <ComingSoon
       icon={Plane}

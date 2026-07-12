@@ -1,7 +1,12 @@
+import { requirePermission } from "@/lib/guard";
 import { ClipboardCheck } from "lucide-react";
 import { ComingSoon } from "@/components/layout/coming-soon";
 
-export default function AprovacoesPage() {
+export default async function AprovacoesPage() {
+  await requirePermission("approvals");
+
+  await requirePermission("approvals");
+
   return (
     <ComingSoon
       icon={ClipboardCheck}

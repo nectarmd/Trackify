@@ -26,7 +26,12 @@ const items: NavItem[] = [
   { href: "/calendario", label: "Calendário", icon: Calendar, need: "calendar" },
   { href: "/tracker", label: "Rastreador", icon: Clock },
   { href: "/reports", label: "Relatórios", icon: BarChart3, need: "reports" },
-  { href: "/projects", label: "Projetos", icon: FolderKanban },
+  {
+    href: "/projects",
+    label: "Projetos",
+    icon: FolderKanban,
+    need: "projects_view",
+  },
 ];
 
 function isActive(pathname: string, href: string) {

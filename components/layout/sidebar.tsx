@@ -46,28 +46,38 @@ const mainNav: NavItem[] = [
     need: "planner",
   },
   { href: "/despesas", label: "DESPESAS", icon: Receipt, need: "expenses" },
-  { href: "/folgas", label: "FOLGAS", icon: Plane },
+  { href: "/folgas", label: "FOLGAS", icon: Plane, need: "time_off" },
 ];
 
 const analyzeNav: NavItem[] = [
   { href: "/painel", label: "PAINEL", icon: LayoutDashboard, need: "reports" },
   { href: "/reports", label: "RELATÓRIOS", icon: BarChart3, need: "reports" },
-  { href: "/atividade", label: "ATIVIDADE", icon: Activity },
+  { href: "/atividade", label: "ATIVIDADE", icon: Activity, need: "activity" },
 ];
 
 const manageNav: NavItem[] = [
-  { href: "/projects", label: "PROJETOS", icon: FolderKanban },
-  { href: "/clients", label: "CLIENTES", icon: Users },
-  { href: "/tags", label: "TAGS", icon: TagIcon },
-  { href: "/equipes", label: "EQUIPES", icon: UsersRound },
+  {
+    href: "/projects",
+    label: "PROJETOS",
+    icon: FolderKanban,
+    need: "projects_view",
+  },
+  { href: "/clients", label: "CLIENTES", icon: Users, need: "clients_view" },
+  { href: "/tags", label: "TAGS", icon: TagIcon, need: "tags_view" },
+  { href: "/equipes", label: "EQUIPES", icon: UsersRound, need: "team_view" },
   {
     href: "/configuracoes",
     label: "CONFIGURAÇÕES",
     icon: Settings,
     adminOnly: true,
   },
-  { href: "/aprovacoes", label: "APROVAÇÕES", icon: ClipboardCheck },
-  { href: "/quiosques", label: "QUIOSQUES", icon: Monitor },
+  {
+    href: "/aprovacoes",
+    label: "APROVAÇÕES",
+    icon: ClipboardCheck,
+    need: "approvals",
+  },
+  { href: "/quiosques", label: "QUIOSQUES", icon: Monitor, need: "kiosks" },
 ];
 
 function NavLink({

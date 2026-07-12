@@ -1,3 +1,4 @@
+import { requirePermission } from "@/lib/guard";
 import { getClients } from "@/lib/queries";
 import { PageHeader } from "@/components/layout/page-header";
 import { ClientsClient } from "@/components/clients/clients-client";
@@ -5,6 +6,8 @@ import { ClientsClient } from "@/components/clients/clients-client";
 export const dynamic = "force-dynamic";
 
 export default async function ClientsPage() {
+  await requirePermission("clients_view");
+
   const clients = await getClients(true);
   return (
     <div className="mx-auto max-w-4xl p-6">
