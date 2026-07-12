@@ -53,7 +53,7 @@ function inviteHtml(workspaceName: string, email: string): string {
         <strong>${ws}</strong> e passa a ver os projetos da equipe.
       </p>
 
-      <a href="${APP_URL}/signup"
+      <a href="${APP_URL}/signup?email=${encodeURIComponent(email)}"
          style="display:inline-block;background:#03A9F4;color:#fff;text-decoration:none;
                 padding:12px 24px;border-radius:8px;font-size:15px;font-weight:600;">
         Criar minha conta

@@ -9,6 +9,8 @@ import {
   Crown,
   MailQuestion,
   X,
+  Copy,
+  Check,
 } from "lucide-react";
 import type {
   WorkspaceMember,
@@ -79,6 +81,27 @@ export function TeamClient({
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [copied, setCopied] = useState<string | null>(null);
+
+  // Sem domínio configurado o e-mail não sai. Este botão monta a mensagem
+  // pronta para você mandar por WhatsApp/Telegram.
+  async function copyInvite(i: WorkspaceInvite) {
+    const url = window.location.origin;
+    // O e-mail vai na URL: o campo já chega preenchido e a pessoa não erra o
+    // endereço (se digitar outro, o convite não pega).
+    const link = `${url}/signup?email=${encodeURIComponent(i.email)}`;
+    const text =
+      `Você foi convidado para o ${workspaceName} no Trackify.\n\n` +
+      `Acesse o link e crie sua conta (o e-mail já vem preenchido):\n${link}\n\n` +
+      `Importante: use exatamente o e-mail ${i.email} — é ele que te coloca no ${workspaceName}.`;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(i.id);
+      setTimeout(() => setCopied(null), 2000);
+    } catch {
+      setNotice("Não foi possível copiar. Copie manualmente: " + text);
+    }
+  }
 
   function openInvite() {
     setEmail("");
@@ -253,18 +276,32 @@ export function TeamClient({
                       e-mail
                     </p>
                   </div>
-                  <span className="shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">
+                  <span className="hidden shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700 sm:inline">
                     Aguardando
                   </span>
                   {isAdmin && (
-                    <button
-                      type="button"
-                      onClick={() => drop(i)}
-                      title="Cancelar convite"
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-slate-100"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => copyInvite(i)}
+                        title="Copiar mensagem de convite"
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-[#03A9F4]/10 hover:text-[#03A9F4]"
+                      >
+                        {copied === i.id ? (
+                          <Check className="h-4 w-4 text-green-600" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => drop(i)}
+                        title="Cancelar convite"
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-slate-100"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </>
                   )}
                 </div>
               ))}

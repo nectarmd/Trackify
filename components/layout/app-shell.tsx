@@ -42,7 +42,9 @@ export function AppShell({
       />
 
       <div className="relative flex min-h-0 flex-1">
-        {desktopOpen && <Sidebar className="hidden md:flex" />}
+        {desktopOpen && (
+          <Sidebar className="hidden md:flex" workspaceName={workspaceName} />
+        )}
 
         {mobileOpen && (
           <>
@@ -54,6 +56,7 @@ export function AppShell({
             />
             <Sidebar
               className="absolute inset-y-0 left-0 z-50 shadow-xl md:hidden"
+              workspaceName={workspaceName}
               onNavigate={() => setMobileOpen(false)}
             />
           </>

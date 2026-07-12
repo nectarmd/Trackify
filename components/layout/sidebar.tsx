@@ -18,6 +18,7 @@ import {
   UsersRound,
   ClipboardCheck,
   Monitor,
+  Building2,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -85,9 +86,11 @@ function isActive(pathname: string, href: string) {
 
 export function Sidebar({
   className,
+  workspaceName,
   onNavigate,
 }: {
   className?: string;
+  workspaceName?: string;
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
@@ -99,6 +102,15 @@ export function Sidebar({
         className
       )}
     >
+      {workspaceName && (
+        <div className="flex items-center gap-2 border-b border-slate-200 bg-[#F3F4F6] px-4 py-3">
+          <Building2 className="h-4 w-4 shrink-0 text-slate-400" />
+          <span className="truncate text-sm font-semibold text-slate-700">
+            {workspaceName}
+          </span>
+        </div>
+      )}
+
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
         {mainNav.map((item) => (
           <NavLink

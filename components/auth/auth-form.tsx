@@ -16,10 +16,13 @@ export function AuthForm({
   mode,
   action,
   notice,
+  defaultEmail,
 }: {
   mode: "login" | "signup";
   action: Action;
   notice?: string;
+  /** Pré-preenche o e-mail (convite): se digitar outro, o convite não pega. */
+  defaultEmail?: string;
 }) {
   const [state, formAction, pending] = useActionState(action, undefined);
   const isLogin = mode === "login";
@@ -58,6 +61,7 @@ export function AuthForm({
               type="email"
               autoComplete="email"
               placeholder="voce@exemplo.com"
+              defaultValue={defaultEmail}
               required
             />
           </div>

@@ -8,6 +8,7 @@ import {
   LogOut,
   Menu,
   UserRound,
+  Building2,
 } from "lucide-react";
 import { signOut } from "@/lib/actions/auth";
 import {
@@ -55,32 +56,33 @@ export function Topbar({
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#03A9F4] text-white">
           <Clock className="h-5 w-5" />
         </div>
-        <span className="hidden shrink-0 text-lg font-bold text-slate-900 sm:inline">
+        <span className="shrink-0 text-lg font-bold text-slate-900">
           Trackify
         </span>
 
+        {/* No celular o nome do workspace sai da linha (não há espaço): ele
+            aparece no menu do avatar e no topo da sidebar. */}
         {workspaceName && (
           <>
             <span className="hidden h-6 w-px shrink-0 bg-slate-200 sm:block" />
-            {/* Só exibe: a edição é no Perfil. */}
-            <span className="truncate text-sm font-medium text-slate-600">
+            <span className="hidden truncate text-sm font-medium text-slate-600 sm:inline">
               {workspaceName}
             </span>
           </>
         )}
       </div>
 
-      <div className="flex shrink-0 items-center gap-1">
+      <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
         <button
           type="button"
-          className="hidden h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 sm:flex"
+          className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100"
           title="Ajuda"
         >
           <CircleQuestionMark className="h-5 w-5" />
         </button>
         <button
           type="button"
-          className="hidden h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 sm:flex"
+          className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100"
           title="Notificações"
         >
           <Bell className="h-5 w-5" />
@@ -99,7 +101,7 @@ export function Topbar({
               initials(display)
             )}
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-60">
+          <DropdownMenuContent align="end" className="w-64">
             <div className="px-1.5 py-1">
               <p className="truncate text-sm font-medium text-slate-800">
                 {display}
@@ -110,6 +112,19 @@ export function Topbar({
                 </p>
               )}
             </div>
+
+            {workspaceName && (
+              <>
+                <DropdownMenuSeparator />
+                <div className="flex items-center gap-2 px-1.5 py-1">
+                  <Building2 className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                  <span className="truncate text-xs font-medium text-slate-600">
+                    {workspaceName}
+                  </span>
+                </div>
+              </>
+            )}
+
             <DropdownMenuSeparator />
             <DropdownMenuItem
               render={<Link href="/perfil" />}

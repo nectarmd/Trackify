@@ -94,29 +94,35 @@ export function EntryDialog({
             />
             <TagSelect tags={tags} value={tagIds} onChange={setTagIds} />
           </div>
-          <div className="grid grid-cols-3 gap-3">
-            <div className="space-y-1.5">
-              <Label>Data</Label>
+          {/* min-w-0 nas células E w-full nos inputs: sem isso o campo nativo de
+              data tem largura mínima maior que a coluna e invade os vizinhos no
+              celular. px-2 + text-sm para os três caberem lado a lado. */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            <div className="min-w-0 space-y-1.5">
+              <Label className="text-xs">Data</Label>
               <Input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
+                className="w-full min-w-0 px-2 text-sm"
               />
             </div>
-            <div className="space-y-1.5">
-              <Label>Início</Label>
+            <div className="min-w-0 space-y-1.5">
+              <Label className="text-xs">Início</Label>
               <Input
                 type="time"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
+                className="w-full min-w-0 px-2 text-sm"
               />
             </div>
-            <div className="space-y-1.5">
-              <Label>Fim</Label>
+            <div className="min-w-0 space-y-1.5">
+              <Label className="text-xs">Fim</Label>
               <Input
                 type="time"
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
+                className="w-full min-w-0 px-2 text-sm"
               />
             </div>
           </div>
