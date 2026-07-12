@@ -4,7 +4,12 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { Clock, List, DollarSign, Play, Square, Plus } from "lucide-react";
-import type { ProjectWithClient, Tag, TimeEntryWithRelations } from "@/lib/types";
+import type {
+  ProjectWithClient,
+  Tag,
+  TimeEntryWithRelations,
+  WorkspaceMember,
+} from "@/lib/types";
 import {
   startTimer,
   stopTimer,
@@ -25,12 +30,18 @@ export function TrackerBar({
   projects,
   tags,
   running,
+  members = [],
+  currentUserId = "",
+  isAdmin = false,
   onEntryFinished,
   onStarted,
 }: {
   projects: ProjectWithClient[];
   tags: Tag[];
   running: TimeEntryWithRelations | null;
+  members?: WorkspaceMember[];
+  currentUserId?: string;
+  isAdmin?: boolean;
   onEntryFinished?: (entry: TimeEntryWithRelations) => void;
   onStarted?: () => void;
 }) {
@@ -54,6 +65,9 @@ export function TrackerBar({
   const [elapsed, setElapsed] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Admin pode lançar tempo para um colaborador (modo manual).
+  const [forUserId, setForUserId] = useState(currentUserId);
 
   // Espelho local do timer: permite reagir na hora ao clique (otimista) e
   // depois reconciliar com o que o servidor devolve.
@@ -140,6 +154,7 @@ export function TrackerBar({
       tag_ids: tagIds,
       start_time: start,
       end_time: end,
+      for_user_id: isAdmin ? forUserId : null,
     });
     setBusy(false);
     if (res?.error) {
@@ -151,7 +166,7 @@ export function TrackerBar({
     // O id vem da action; a reconciliação substitui este objeto pelo do servidor.
     onEntryFinished?.({
       id: res?.id ?? crypto.randomUUID(),
-      user_id: "",
+      user_id: isAdmin ? forUserId : currentUserId,
       created_at: new Date().toISOString(),
       description,
       project_id: projectId,
@@ -291,6 +306,26 @@ export function TrackerBar({
                 onChange={(e) => setDate(e.target.value)}
                 className="w-40"
               />
+
+              {/* Admin lança tempo por um colaborador. Membro nem vê isto — e o
+                  RLS barra mesmo que tentasse forçar. */}
+              {isAdmin && members.length > 1 && (
+                <select
+                  value={forUserId}
+                  onChange={(e) => setForUserId(e.target.value)}
+                  title="Lançar para quem"
+                  className="h-9 rounded-md border border-input bg-transparent px-2 text-sm"
+                >
+                  {members.map((m) => (
+                    <option key={m.user_id} value={m.user_id}>
+                      {m.user_id === currentUserId
+                        ? "Para mim"
+                        : m.name || m.email || "Membro"}
+                    </option>
+                  ))}
+                </select>
+              )}
+
               <Button onClick={onManualAdd} disabled={busy} className="gap-1">
                 <Plus className="h-4 w-4" /> Adicionar
               </Button>

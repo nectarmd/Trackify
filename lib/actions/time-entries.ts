@@ -50,6 +50,8 @@ export type EntryInput = {
   tag_ids: string[];
   start_time?: string;
   end_time?: string | null;
+  /** Só o admin pode lançar tempo para outra pessoa (o RLS também exige isso). */
+  for_user_id?: string | null;
 };
 
 export async function startTimer(input: EntryInput): Promise<ActionResult> {
@@ -132,10 +134,17 @@ export async function createManualEntry(
   }
 
   const { supabase, user, workspace } = await requireUser();
+
+  // Lançar para outra pessoa é privilégio de admin (o RLS confirma).
+  const owner =
+    workspace.role === "admin" && input.for_user_id
+      ? input.for_user_id
+      : user.id;
+
   const { data, error } = await supabase
     .from("time_entries")
     .insert({
-      user_id: user.id,
+      user_id: owner,
       workspace_id: workspace.id,
       description: input.description ?? "",
       project_id: input.project_id,
@@ -148,7 +157,9 @@ export async function createManualEntry(
 
   if (error || !data) return { error: "Não foi possível criar a entrada." };
 
-  await syncTags(supabase, user.id, data.id, input.tag_ids ?? []);
+  // Usa o dono da entrada, não quem lançou: se o admin lança para outra
+  // pessoa, a tag tem que ficar com ela.
+  await syncTags(supabase, owner, data.id, input.tag_ids ?? []);
 
   revalidatePath("/tracker");
   return { ok: true };

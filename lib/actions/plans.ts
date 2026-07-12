@@ -51,9 +51,18 @@ export async function createPlan(formData: FormData): Promise<ActionResult> {
   if ("error" in parsed) return parsed;
 
   const { supabase, user, workspace } = await requireUser();
-  const { error } = await supabase
-    .from("plans")
-    .insert({ ...parsed, user_id: user.id, workspace_id: workspace.id });
+
+  // Planejar para outra pessoa é privilégio de admin (o RLS confirma).
+  const assigneeRaw = String(formData.get("assignee_id") ?? "").trim();
+  const assignee_id =
+    workspace.role === "admin" && assigneeRaw ? assigneeRaw : user.id;
+
+  const { error } = await supabase.from("plans").insert({
+    ...parsed,
+    user_id: user.id,
+    assignee_id,
+    workspace_id: workspace.id,
+  });
   if (error) return { error: "Não foi possível criar o planejamento." };
 
   revalidatePath("/planejador");
@@ -67,8 +76,16 @@ export async function updatePlan(
   const parsed = parsePlan(formData);
   if ("error" in parsed) return parsed;
 
-  const { supabase } = await requireUser();
-  const { error } = await supabase.from("plans").update(parsed).eq("id", id);
+  const { supabase, workspace } = await requireUser();
+
+  // Só o admin pode reatribuir o plano a outra pessoa.
+  const assigneeRaw = String(formData.get("assignee_id") ?? "").trim();
+  const update: Record<string, unknown> = { ...parsed };
+  if (workspace.role === "admin" && assigneeRaw) {
+    update.assignee_id = assigneeRaw;
+  }
+
+  const { error } = await supabase.from("plans").update(update).eq("id", id);
   if (error) return { error: "Não foi possível atualizar o planejamento." };
 
   revalidatePath("/planejador");

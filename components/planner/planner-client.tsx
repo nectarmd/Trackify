@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import { format, startOfWeek, endOfWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Plus, MoreVertical, Pencil, Trash2, CalendarRange } from "lucide-react";
-import type { PlanWithProject, ProjectWithClient } from "@/lib/types";
+import type {
+  PlanWithProject,
+  ProjectWithClient,
+  WorkspaceMember,
+} from "@/lib/types";
 import { createPlan, updatePlan, deletePlan } from "@/lib/actions/plans";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -37,9 +41,15 @@ const weekOpts = { weekStartsOn: 1 as const, locale: ptBR };
 export function PlannerClient({
   plans,
   projects,
+  members = [],
+  currentUserId = "",
+  isAdmin = false,
 }: {
   plans: PlanWithProject[];
   projects: ProjectWithClient[];
+  members?: WorkspaceMember[];
+  currentUserId?: string;
+  isAdmin?: boolean;
 }) {
   const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -49,8 +59,16 @@ export function PlannerClient({
   const [startDate, setStartDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [endDate, setEndDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [notes, setNotes] = useState("");
+  const [assigneeId, setAssigneeId] = useState(currentUserId);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  function memberName(userId: string | null) {
+    if (!userId) return null;
+    if (userId === currentUserId) return "Você";
+    const m = members.find((x) => x.user_id === userId);
+    return m?.name || m?.email || "Colaborador";
+  }
 
   const groups = useMemo(() => {
     const map = new Map<string, { label: string; items: PlanWithProject[] }>();
@@ -79,6 +97,7 @@ export function PlannerClient({
     setStartDate(format(new Date(), "yyyy-MM-dd"));
     setEndDate(format(new Date(), "yyyy-MM-dd"));
     setNotes("");
+    setAssigneeId(currentUserId);
     setError(null);
     setDialogOpen(true);
   }
@@ -89,6 +108,7 @@ export function PlannerClient({
     setStartDate(p.start_date);
     setEndDate(p.end_date);
     setNotes(p.notes ?? "");
+    setAssigneeId(p.assignee_id ?? currentUserId);
     setError(null);
     setDialogOpen(true);
   }
@@ -102,6 +122,7 @@ export function PlannerClient({
     fd.set("start_date", startDate);
     fd.set("end_date", endDate);
     fd.set("notes", notes);
+    if (isAdmin) fd.set("assignee_id", assigneeId);
     const res = editing
       ? await updatePlan(editing.id, fd)
       : await createPlan(fd);
@@ -176,6 +197,15 @@ export function PlannerClient({
                             "dd/MM/yyyy"
                           )}
                         </span>
+                        {/* Para o admin, saber de quem é o plano é o essencial. */}
+                        {isAdmin && p.assignee_id && (
+                          <>
+                            <span>·</span>
+                            <span className="rounded-full bg-[#03A9F4]/10 px-2 py-0.5 font-medium text-[#03A9F4]">
+                              {memberName(p.assignee_id)}
+                            </span>
+                          </>
+                        )}
                       </div>
                       {p.notes && (
                         <p className="mt-1 text-sm text-slate-600">{p.notes}</p>
@@ -260,6 +290,27 @@ export function PlannerClient({
               </div>
             </div>
             <div className="space-y-1.5">
+              {/* Admin planeja para a equipe. O colaborador só vê o que é dele
+                  (o RLS garante, mesmo que tente forçar). */}
+              {isAdmin && members.length > 1 && (
+                <div className="space-y-1.5">
+                  <Label>Para quem</Label>
+                  <select
+                    value={assigneeId}
+                    onChange={(e) => setAssigneeId(e.target.value)}
+                    className="h-9 w-full rounded-md border border-input bg-transparent px-2 text-sm"
+                  >
+                    {members.map((m) => (
+                      <option key={m.user_id} value={m.user_id}>
+                        {m.user_id === currentUserId
+                          ? "Para mim"
+                          : m.name || m.email || "Colaborador"}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <Label>Notas</Label>
               <Input
                 value={notes}

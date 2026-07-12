@@ -25,7 +25,7 @@ export const PERMISSION_LABELS: Record<
   see_all_time: {
     title: "Ver o tempo de toda a equipe",
     description:
-      "Se desligado, o colaborador só enxerga as próprias entradas de tempo.",
+      "Desligado, o colaborador só enxerga as próprias entradas — no Rastreador, na Planilha e em qualquer relatório.",
   },
   reports: {
     title: "Relatórios e Painel",

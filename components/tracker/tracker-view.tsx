@@ -5,6 +5,7 @@ import type {
   ProjectWithClient,
   Tag,
   TimeEntryWithRelations,
+  WorkspaceMember,
 } from "@/lib/types";
 import { stopCurrentTimer } from "@/lib/actions/time-entries";
 import { TrackerBar } from "./tracker-bar";
@@ -23,11 +24,17 @@ export function TrackerView({
   tags,
   running,
   entries,
+  members = [],
+  currentUserId = "",
+  isAdmin = false,
 }: {
   projects: ProjectWithClient[];
   tags: Tag[];
   running: TimeEntryWithRelations | null;
   entries: TimeEntryWithRelations[];
+  members?: WorkspaceMember[];
+  currentUserId?: string;
+  isAdmin?: boolean;
 }) {
   const [localEntries, setLocalEntries] = useState(entries);
   const [localRunning, setLocalRunning] = useState(running);
@@ -80,6 +87,9 @@ export function TrackerView({
         tags={tags}
         // Se o timer nasceu num card, a barra do topo não o assume.
         running={startedFromRowId ? null : localRunning}
+        members={members}
+        currentUserId={currentUserId}
+        isAdmin={isAdmin}
         onEntryFinished={addEntry}
         onStarted={() => setStartedFromRowId(null)}
       />

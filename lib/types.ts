@@ -63,6 +63,8 @@ export type ExpenseWithProject = Expense & {
 export type Plan = {
   id: string;
   user_id: string;
+  /** Para QUEM é o plano. O admin planeja para os colaboradores. */
+  assignee_id: string | null;
   project_id: string | null;
   title: string;
   start_date: string;
