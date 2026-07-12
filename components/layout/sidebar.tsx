@@ -164,29 +164,28 @@ export function Sidebar({
           />
         ))}
 
-        <p className="px-3 pb-1 pt-5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-          Analisar
-        </p>
-        {visible(analyzeNav).map((item) => (
-          <NavLink
-            key={item.href}
-            item={item}
-            active={isActive(pathname, item.href)}
-            onNavigate={onNavigate}
-          />
-        ))}
+        {/* Só renderiza o rótulo da seção se houver item visível: um membro sem
+            permissões via "ANALISAR" e "GERENCIAR" como cabeçalhos vazios. */}
+        {(["Analisar", "Gerenciar"] as const).map((label) => {
+          const items = visible(label === "Analisar" ? analyzeNav : manageNav);
+          if (items.length === 0) return null;
 
-        <p className="px-3 pb-1 pt-5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-          Gerenciar
-        </p>
-        {visible(manageNav).map((item) => (
-          <NavLink
-            key={item.href}
-            item={item}
-            active={isActive(pathname, item.href)}
-            onNavigate={onNavigate}
-          />
-        ))}
+          return (
+            <div key={label} className="space-y-0.5">
+              <p className="px-3 pb-1 pt-5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                {label}
+              </p>
+              {items.map((item) => (
+                <NavLink
+                  key={item.href}
+                  item={item}
+                  active={isActive(pathname, item.href)}
+                  onNavigate={onNavigate}
+                />
+              ))}
+            </div>
+          );
+        })}
       </nav>
     </aside>
   );

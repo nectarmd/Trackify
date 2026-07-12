@@ -257,7 +257,7 @@ export async function duplicateEntry(id: string): Promise<ActionResult> {
 
 /** Inicia um novo timer com os mesmos dados de uma entrada existente. */
 export async function continueEntry(id: string): Promise<ActionResult> {
-  const { supabase, user } = await requireUser();
+  const { supabase } = await requireUser();
   const src = await loadEntryWithTags(supabase, id);
   if (!src) return { error: "Entrada não encontrada." };
 
