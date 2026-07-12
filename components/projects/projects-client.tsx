@@ -158,7 +158,7 @@ export function ProjectsClient({
         </Button>
       </div>
 
-      <div className="overflow-hidden rounded-lg border bg-white">
+      <div className="overflow-x-auto rounded-lg border bg-white">
         {filtered.length === 0 ? (
           <div className="p-12 text-center">
             <p className="text-sm font-medium text-slate-700">
@@ -171,7 +171,7 @@ export function ProjectsClient({
             )}
           </div>
         ) : (
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[520px] text-sm">
             <thead>
               <tr className="border-b bg-slate-50 text-left text-xs uppercase text-muted-foreground">
                 <th className="px-4 py-2 font-medium">Projeto</th>

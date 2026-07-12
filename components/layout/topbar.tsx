@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleQuestionMark, Bell, Clock, LogOut } from "lucide-react";
+import { CircleQuestionMark, Bell, Clock, LogOut, Menu } from "lucide-react";
 import { signOut } from "@/lib/actions/auth";
 import {
   DropdownMenu,
@@ -17,10 +17,24 @@ function initials(email: string): string {
   return (chars || name.slice(0, 2) || "U").toUpperCase();
 }
 
-export function Topbar({ email }: { email: string }) {
+export function Topbar({
+  email,
+  onToggleSidebar,
+}: {
+  email: string;
+  onToggleSidebar?: () => void;
+}) {
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4">
-      <div className="flex items-center gap-3">
+    <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-2 sm:px-4">
+      <div className="flex items-center gap-2 sm:gap-3">
+        <button
+          type="button"
+          onClick={onToggleSidebar}
+          aria-label="Mostrar ou esconder o menu lateral"
+          className="flex h-9 w-9 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#03A9F4] text-white">
           <Clock className="h-5 w-5" />
         </div>
