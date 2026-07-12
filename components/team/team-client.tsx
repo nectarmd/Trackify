@@ -122,21 +122,25 @@ export function TeamClient({
         <div className="divide-y divide-slate-100">
           {/* Proprietário */}
           <div className="flex items-center gap-3 px-4 py-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#03A9F4] text-sm font-semibold text-white">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#03A9F4] text-sm font-semibold text-white">
               {initials(ownerEmail)}
             </span>
             <div className="min-w-0 flex-1">
-              <p className="flex items-center gap-2 font-medium text-slate-800">
-                {ownerEmail}
-                <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
+              {/* O e-mail precisa estar num span próprio: texto solto dentro de
+                  um flex não trunca e transborda por cima dos selos. */}
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="truncate font-medium text-slate-800">
+                  {ownerEmail}
+                </span>
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
                   <Crown className="h-3 w-3" /> Proprietário
                 </span>
-              </p>
-              <p className="text-xs text-muted-foreground">
+              </div>
+              <p className="truncate text-xs text-muted-foreground">
                 Administrador · Você
               </p>
             </div>
-            <span className="rounded-full bg-green-100 px-2 py-0.5 text-[11px] font-medium text-green-700">
+            <span className="shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-[11px] font-medium text-green-700">
               Ativo
             </span>
           </div>
@@ -144,21 +148,23 @@ export function TeamClient({
           {/* Membros convidados */}
           {members.map((m) => (
             <div key={m.id} className="flex items-center gap-3 px-4 py-3">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 text-sm font-semibold text-slate-600">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-200 text-sm font-semibold text-slate-600">
                 {initials(m.name || m.email)}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="flex items-center gap-2 font-medium text-slate-800">
-                  {m.name || m.email}
-                  <UserRound className="h-3.5 w-3.5 text-slate-400" />
-                </p>
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="truncate font-medium text-slate-800">
+                    {m.name || m.email}
+                  </span>
+                  <UserRound className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                </div>
                 <p className="truncate text-xs text-muted-foreground">
                   {m.email} · {ROLE_LABELS[m.role]}
                 </p>
               </div>
               <span
                 className={cn(
-                  "rounded-full px-2 py-0.5 text-[11px] font-medium",
+                  "shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium",
                   m.status === "active"
                     ? "bg-green-100 text-green-700"
                     : "bg-slate-100 text-slate-500"
@@ -167,7 +173,7 @@ export function TeamClient({
                 {m.status === "active" ? "Ativo" : "Convidado"}
               </span>
               <DropdownMenu>
-                <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-slate-100">
+                <DropdownMenuTrigger className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-slate-100">
                   <MoreVertical className="h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
