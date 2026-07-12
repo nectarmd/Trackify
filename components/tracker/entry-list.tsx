@@ -50,10 +50,14 @@ export function EntryList({
   entries,
   projects,
   tags,
+  onContinue,
+  onDeleted,
 }: {
   entries: TimeEntryWithRelations[];
   projects: ProjectWithClient[];
   tags: Tag[];
+  onContinue?: (entry: TimeEntryWithRelations) => void;
+  onDeleted?: (id: string) => void;
 }) {
   const [mode, setMode] = useState<GroupMode>("day");
 
@@ -107,30 +111,32 @@ export function EntryList({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-lg border border-slate-200 bg-white px-4 py-3">
-        <div className="flex min-w-0 items-center gap-3">
-          {/* shrink-0: sem isso o flex espremia esta caixa e o overflow-hidden
-              cortava o último botão ("Mês"). */}
-          <div className="flex shrink-0 overflow-hidden rounded-md border border-slate-200">
-            {(Object.keys(MODE_LABELS) as GroupMode[]).map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => setMode(m)}
-                className={cn(
-                  "whitespace-nowrap px-3 py-1.5 text-sm font-medium transition-colors",
-                  mode === m
-                    ? "bg-[#03A9F4] text-white"
-                    : "text-slate-600 hover:bg-slate-100"
-                )}
-              >
-                {MODE_LABELS[m]}
-              </button>
-            ))}
-          </div>
-          <span className="truncate text-sm text-slate-500">{periodLabel}</span>
+      {/* Linha única em qualquer largura: os extremos (botões e total) nunca
+          encolhem; quem cede espaço é o rótulo do meio, que trunca. */}
+      <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2.5 sm:gap-3 sm:px-4 sm:py-3">
+        <div className="flex shrink-0 overflow-hidden rounded-md border border-slate-200">
+          {(Object.keys(MODE_LABELS) as GroupMode[]).map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => setMode(m)}
+              className={cn(
+                "whitespace-nowrap px-2 py-1.5 text-xs font-medium transition-colors sm:px-3 sm:text-sm",
+                mode === m
+                  ? "bg-[#03A9F4] text-white"
+                  : "text-slate-600 hover:bg-slate-100"
+              )}
+            >
+              {MODE_LABELS[m]}
+            </button>
+          ))}
         </div>
-        <span className="shrink-0 font-mono text-lg font-semibold tabular-nums text-slate-800">
+
+        <span className="min-w-0 flex-1 truncate text-xs text-slate-500 sm:text-sm">
+          {periodLabel}
+        </span>
+
+        <span className="shrink-0 whitespace-nowrap font-mono text-base font-semibold tabular-nums text-slate-800 sm:text-lg">
           {formatDuration(periodTotal)}
         </span>
       </div>
@@ -165,6 +171,8 @@ export function EntryList({
                   entry={e}
                   projects={projects}
                   tags={tags}
+                  onContinue={onContinue}
+                  onDeleted={onDeleted}
                 />
               ))}
             </div>

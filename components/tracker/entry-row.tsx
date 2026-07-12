@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { DollarSign, Play, MoreVertical, Pencil, Copy, Trash2 } from "lucide-react";
 import type { ProjectWithClient, Tag, TimeEntryWithRelations } from "@/lib/types";
 import {
@@ -22,35 +21,42 @@ export function EntryRow({
   entry,
   projects,
   tags,
+  onContinue,
+  onDeleted,
 }: {
   entry: TimeEntryWithRelations;
   projects: ProjectWithClient[];
   tags: Tag[];
+  onContinue?: (entry: TimeEntryWithRelations) => void;
+  onDeleted?: (id: string) => void;
 }) {
-  const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const duration = entryDurationSeconds(entry.start_time, entry.end_time);
 
-  async function onContinue() {
+  // Todas as actions abaixo já chamam revalidatePath("/tracker"), que devolve a
+  // árvore atualizada. O router.refresh() que existia aqui refazia a página
+  // inteira uma segunda vez — era o que deixava o play do card lento.
+  async function handleContinue() {
+    if (busy) return;
     setBusy(true);
+    onContinue?.(entry); // o timer no topo já começa a contar
     await continueEntry(entry.id);
     setBusy(false);
-    router.refresh();
   }
-  async function onDuplicate() {
+  async function handleDuplicate() {
+    if (busy) return;
     setBusy(true);
     await duplicateEntry(entry.id);
     setBusy(false);
-    router.refresh();
   }
-  async function onDelete() {
+  async function handleDelete() {
     if (!confirm("Excluir esta entrada?")) return;
     setBusy(true);
+    onDeleted?.(entry.id); // some da lista na hora
     await deleteEntry(entry.id);
     setBusy(false);
-    router.refresh();
   }
 
   return (
@@ -98,7 +104,7 @@ export function EntryRow({
 
         <button
           type="button"
-          onClick={onContinue}
+          onClick={handleContinue}
           disabled={busy}
           title="Continuar"
           className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-[#03A9F4]/10 hover:text-[#03A9F4]"
@@ -114,11 +120,11 @@ export function EntryRow({
             <DropdownMenuItem onClick={() => setEditing(true)}>
               <Pencil className="mr-2 h-4 w-4" /> Editar
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={onDuplicate}>
+            <DropdownMenuItem onClick={handleDuplicate}>
               <Copy className="mr-2 h-4 w-4" /> Duplicar
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={onDelete}
+              onClick={handleDelete}
               className="text-red-600 focus:text-red-600"
             >
               <Trash2 className="mr-2 h-4 w-4" /> Excluir
