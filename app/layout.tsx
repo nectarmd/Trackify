@@ -24,6 +24,13 @@ export const metadata: Metadata = {
     icon: "/icon-192.png",
     apple: "/apple-icon.png",
   },
+  other: {
+    // O Next só emite a tag moderna (`mobile-web-app-capable`). O iOS só passou
+    // a respeitar o `display: standalone` do manifesto na versão 16.4 — em
+    // iPhones mais antigos, sem esta tag legada, o app abriria com a barra do
+    // navegador mesmo instalado.
+    "apple-mobile-web-app-capable": "yes",
+  },
 };
 
 // viewportFit: "cover" é o que faz o iOS expor as safe areas (env(safe-area-inset-*)),
