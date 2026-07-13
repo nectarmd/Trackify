@@ -127,4 +127,12 @@
   html {
     @apply font-sans;
   }
+
+  /* PWA/iOS: sem isto o documento faz o "efeito elástico" ao arrastar, e os
+     elementos fixos (o menu inferior) vão junto — descolando do fundo da tela.
+     O conteúdo interno continua rolando normalmente; quem não rola é a página. */
+  html,
+  body {
+    overscroll-behavior: none;
+  }
 }

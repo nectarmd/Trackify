@@ -79,7 +79,9 @@ export function AppShell({
           </>
         )}
 
-        <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+        {/* overscroll-contain: ao chegar no fim da lista, o gesto não "vaza"
+            para o documento (que voltaria a arrastar a tela inteira). */}
+        <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain">
           {children}
         </main>
       </div>
