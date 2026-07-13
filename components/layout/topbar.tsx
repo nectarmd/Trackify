@@ -41,37 +41,41 @@ export function Topbar({
   const display = fullName || email;
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-2 sm:px-4">
-      <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-        <button
-          type="button"
-          onClick={onToggleSidebar}
-          aria-label="Mostrar ou esconder o menu lateral"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100"
-        >
-          <Menu className="h-5 w-5" />
-        </button>
+    // pt-[env(safe-area-inset-top)]: no PWA o conteúdo ocupa a tela inteira,
+    // inclusive por baixo da câmera/notch. O padding empurra a barra para
+    // baixo da área segura, e o fundo branco continua preenchendo o topo.
+    <header className="shrink-0 border-b border-slate-200 bg-white pt-[env(safe-area-inset-top)]">
+      <div className="flex h-14 items-center justify-between px-2 sm:px-4">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <button
+            type="button"
+            onClick={onToggleSidebar}
+            aria-label="Mostrar ou esconder o menu lateral"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
 
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#03A9F4] text-white">
-          <Clock className="h-5 w-5" />
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#03A9F4] text-white">
+            <Clock className="h-5 w-5" />
+          </div>
+          <span className="shrink-0 text-lg font-bold text-slate-900">
+            Trackify
+          </span>
+
+          {/* No celular o nome do workspace sai da linha (não há espaço): ele
+              aparece no menu do avatar e no topo da sidebar. */}
+          {workspaceName && (
+            <>
+              <span className="hidden h-6 w-px shrink-0 bg-slate-200 sm:block" />
+              <span className="hidden truncate text-sm font-medium text-slate-600 sm:inline">
+                {workspaceName}
+              </span>
+            </>
+          )}
         </div>
-        <span className="shrink-0 text-lg font-bold text-slate-900">
-          Trackify
-        </span>
 
-        {/* No celular o nome do workspace sai da linha (não há espaço): ele
-            aparece no menu do avatar e no topo da sidebar. */}
-        {workspaceName && (
-          <>
-            <span className="hidden h-6 w-px shrink-0 bg-slate-200 sm:block" />
-            <span className="hidden truncate text-sm font-medium text-slate-600 sm:inline">
-              {workspaceName}
-            </span>
-          </>
-        )}
-      </div>
-
-      <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+        <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
         {/* Engrenagem: atalho direto para Configurações (só faz sentido p/ admin). */}
         {isAdmin && (
           <Link
@@ -149,7 +153,8 @@ export function Topbar({
               <LogOut className="mr-2 h-4 w-4" /> Sair
             </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+          </DropdownMenu>
+        </div>
       </div>
     </header>
   );
