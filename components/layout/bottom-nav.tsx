@@ -46,11 +46,10 @@ export function BottomNav({ permissions }: { permissions?: Permissions }) {
   );
 
   return (
-    // A área segura do iPhone é ~34px. Usá-la inteira deixava uma faixa branca
-    // grande sob os ícones. Aqui descontamos 20px dela: o menu desce para perto
-    // da borda, mantendo só a folga necessária para os rótulos não ficarem
-    // debaixo da barrinha do indicador de home. Em telas sem barrinha, fica 4px.
-    <nav className="flex shrink-0 border-t border-slate-200 bg-white pb-[max(4px,calc(env(safe-area-inset-bottom)-20px))] md:hidden">
+    // Sem reserva de área segura: o menu vai até a borda real da tela, com o
+    // menor espaço possível embaixo. O indicador de home do iPhone é
+    // translúcido e fica por cima — os ícones continuam visíveis.
+    <nav className="flex shrink-0 border-t border-slate-200 bg-white pb-0 md:hidden">
       {visible.map((item) => {
         const Icon = item.icon;
         const active = isActive(pathname, item.href);
@@ -59,7 +58,9 @@ export function BottomNav({ permissions }: { permissions?: Permissions }) {
             key={item.href}
             href={item.href}
             className={cn(
-              "flex flex-1 flex-col items-center justify-center gap-1 py-2 text-[10px] font-medium transition-colors",
+              // pt-2 pb-1: menos folga embaixo do rótulo que em cima do ícone,
+              // para o menu encostar o máximo possível na borda da tela.
+              "flex flex-1 flex-col items-center justify-center gap-1 pt-2 pb-1 text-[10px] font-medium transition-colors",
               active
                 ? "text-[#03A9F4]"
                 : "text-slate-500 hover:text-slate-900"
