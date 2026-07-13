@@ -37,10 +37,14 @@ export function AppShell({
   }
 
   return (
-    // fixed inset-0: prende o shell à viewport. Com h-dvh no fluxo normal, o
-    // iOS/PWA recalculava a altura ao navegar e empurrava o menu inferior para
-    // fora da tela. Fixo, o menu é sempre o último item visível.
-    <div className="fixed inset-0 flex flex-col overflow-hidden bg-slate-50 text-slate-900">
+    // fixed + top-0 ancora no topo; h-dvh define a altura pela viewport dinâmica.
+    //
+    // Só `inset-0` não bastava: no PWA do iOS (status bar translúcido) o retângulo
+    // do `bottom: 0` é calculado errado, e o shell terminava dezenas de pixels
+    // acima da borda real — o fundo branco da página aparecia sob o menu, dando
+    // a impressão de uma faixa vazia. Com a altura vinda do dvh, o shell vai até
+    // o fim da tela e o menu encosta no fundo.
+    <div className="fixed inset-x-0 top-0 flex h-dvh flex-col overflow-hidden bg-slate-50 text-slate-900">
       <Topbar
         email={email}
         fullName={fullName}
