@@ -46,7 +46,11 @@ export function BottomNav({ permissions }: { permissions?: Permissions }) {
   );
 
   return (
-    <nav className="flex shrink-0 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden">
+    // A área segura do iPhone é ~34px. Usá-la inteira deixava uma faixa branca
+    // grande sob os ícones. Aqui descontamos 20px dela: o menu desce para perto
+    // da borda, mantendo só a folga necessária para os rótulos não ficarem
+    // debaixo da barrinha do indicador de home. Em telas sem barrinha, fica 4px.
+    <nav className="flex shrink-0 border-t border-slate-200 bg-white pb-[max(4px,calc(env(safe-area-inset-bottom)-20px))] md:hidden">
       {visible.map((item) => {
         const Icon = item.icon;
         const active = isActive(pathname, item.href);
