@@ -128,6 +128,22 @@ export async function getWorkspaceMembers(): Promise<WorkspaceMember[]> {
   return (data as WorkspaceMember[]) ?? [];
 }
 
+export type AlertItem = {
+  id: string;
+  title: string;
+  message: string;
+  created_at: string;
+  is_read: boolean;
+};
+
+/** Alertas do workspace + se EU já li, numa única ida ao banco. */
+export async function getMyAlerts(): Promise<AlertItem[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("my_alerts");
+  if (error) return [];
+  return (data as AlertItem[]) ?? [];
+}
+
 export async function getPendingInvites(): Promise<WorkspaceInvite[]> {
   const supabase = await createClient();
   const { data } = await supabase

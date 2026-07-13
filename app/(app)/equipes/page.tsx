@@ -25,8 +25,8 @@ export default async function EquipesPage() {
   return (
     <div className="mx-auto max-w-4xl p-4 sm:p-6">
       <PageHeader
-        title="Equipes"
-        description={`Membros de "${workspace.name}". Quem entra aqui enxerga os projetos e o tempo deste workspace — e de nenhum outro.`}
+        title="Colaboradores"
+        description={`Quem faz parte de "${workspace.name}". Quem entra aqui enxerga apenas este workspace — e nenhum outro.`}
       />
       <TeamClient
         members={members}

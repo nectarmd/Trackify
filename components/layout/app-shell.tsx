@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Permissions } from "@/lib/permissions";
+import type { AlertItem } from "@/lib/queries";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 import { BottomNav } from "@/components/layout/bottom-nav";
@@ -13,6 +14,7 @@ export function AppShell({
   workspaceName,
   permissions,
   isAdmin,
+  alerts,
   children,
 }: {
   email: string;
@@ -21,6 +23,7 @@ export function AppShell({
   workspaceName?: string;
   permissions?: Permissions;
   isAdmin?: boolean;
+  alerts?: AlertItem[];
   children: React.ReactNode;
 }) {
   // Gaveta no mobile; colapso no desktop.
@@ -43,6 +46,8 @@ export function AppShell({
         fullName={fullName}
         avatarUrl={avatarUrl}
         workspaceName={workspaceName}
+        isAdmin={isAdmin}
+        alerts={alerts}
         onToggleSidebar={toggleSidebar}
       />
 

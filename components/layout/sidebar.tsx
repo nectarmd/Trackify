@@ -57,20 +57,19 @@ const analyzeNav: NavItem[] = [
 
 const manageNav: NavItem[] = [
   {
+    href: "/equipes",
+    label: "COLABORADORES",
+    icon: UsersRound,
+    need: "team_view",
+  },
+  { href: "/clients", label: "CLIENTES", icon: Users, need: "clients_view" },
+  {
     href: "/projects",
     label: "PROJETOS",
     icon: FolderKanban,
     need: "projects_view",
   },
-  { href: "/clients", label: "CLIENTES", icon: Users, need: "clients_view" },
   { href: "/tags", label: "TAGS", icon: TagIcon, need: "tags_view" },
-  { href: "/equipes", label: "EQUIPES", icon: UsersRound, need: "team_view" },
-  {
-    href: "/configuracoes",
-    label: "CONFIGURAÇÕES",
-    icon: Settings,
-    adminOnly: true,
-  },
   {
     href: "/aprovacoes",
     label: "APROVAÇÕES",
@@ -78,6 +77,12 @@ const manageNav: NavItem[] = [
     need: "approvals",
   },
   { href: "/quiosques", label: "QUIOSQUES", icon: Monitor, need: "kiosks" },
+  {
+    href: "/configuracoes",
+    label: "CONFIGURAÇÕES",
+    icon: Settings,
+    adminOnly: true,
+  },
 ];
 
 function NavLink({

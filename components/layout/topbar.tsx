@@ -1,16 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import {
-  CircleQuestionMark,
-  Bell,
-  Clock,
-  LogOut,
-  Menu,
-  UserRound,
-  Building2,
-} from "lucide-react";
+import { Clock, LogOut, Menu, UserRound, Building2, Settings } from "lucide-react";
 import { signOut } from "@/lib/actions/auth";
+import type { AlertItem } from "@/lib/queries";
+import { AlertsMenu } from "@/components/layout/alerts-menu";
+import { HelpMenu } from "@/components/layout/help-menu";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,12 +26,16 @@ export function Topbar({
   fullName,
   avatarUrl,
   workspaceName,
+  isAdmin = false,
+  alerts = [],
   onToggleSidebar,
 }: {
   email: string;
   fullName?: string;
   avatarUrl?: string | null;
   workspaceName?: string;
+  isAdmin?: boolean;
+  alerts?: AlertItem[];
   onToggleSidebar?: () => void;
 }) {
   const display = fullName || email;
@@ -73,20 +72,19 @@ export function Topbar({
       </div>
 
       <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
-        <button
-          type="button"
-          className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100"
-          title="Ajuda"
-        >
-          <CircleQuestionMark className="h-5 w-5" />
-        </button>
-        <button
-          type="button"
-          className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100"
-          title="Notificações"
-        >
-          <Bell className="h-5 w-5" />
-        </button>
+        {/* Engrenagem: atalho direto para Configurações (só faz sentido p/ admin). */}
+        {isAdmin && (
+          <Link
+            href="/configuracoes"
+            title="Configurações"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100"
+          >
+            <Settings className="h-5 w-5" />
+          </Link>
+        )}
+
+        <HelpMenu isAdmin={isAdmin} />
+        <AlertsMenu alerts={alerts} isAdmin={isAdmin} />
 
         <DropdownMenu>
           <DropdownMenuTrigger className="ml-1 flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#03A9F4] text-sm font-semibold text-white hover:opacity-90">
@@ -107,9 +105,7 @@ export function Topbar({
                 {display}
               </p>
               {fullName && (
-                <p className="truncate text-xs text-muted-foreground">
-                  {email}
-                </p>
+                <p className="truncate text-xs text-muted-foreground">{email}</p>
               )}
             </div>
 
@@ -132,6 +128,16 @@ export function Topbar({
             >
               <UserRound className="mr-2 h-4 w-4" /> Perfil
             </DropdownMenuItem>
+
+            {isAdmin && (
+              <DropdownMenuItem
+                render={<Link href="/configuracoes" />}
+                className="cursor-pointer"
+              >
+                <Settings className="mr-2 h-4 w-4" /> Configurações
+              </DropdownMenuItem>
+            )}
+
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={async () => {
